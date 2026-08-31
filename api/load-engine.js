@@ -100,22 +100,21 @@ module.exports = async (req, res) => {
     bundledCode += "# Tokens Remaining: " + tokens + " Bars\n";
     bundledCode += "# =============================================================================\n\n";
 
+    if (htmlReportContent) {
+      bundledCode += `ALU_DOOR_EMBEDDED_HTML = ${JSON.stringify(htmlReportContent)};\n\n`;
+    }
+
     for (const file of rubyFiles) {
       const filePath = path.join(pilotDir, file);
       if (fs.existsSync(filePath)) {
         let code = fs.readFileSync(filePath, 'utf8');
 
-        // Strip require_relative statements since all modules are concatenated in RAM
+        // Strip disk-loading statements since all modules are loaded directly into RAM
         code = code.replace(/require_relative\s+['"].*?['"]/g, '# [RAM Stripped require_relative]');
-
-        // Inject the embedded HTML report content directly into AluDoorPilot::ReportDialog
-        if (file === 'alu_report_dialog.rb' && htmlReportContent) {
-          const escapedHtml = JSON.stringify(htmlReportContent);
-          code = code.replace(
-            /html_content\s*=\s*File\.read\(HTML_FILE.*?\)/,
-            `html_content = ${escapedHtml}`
-          );
-        }
+        code = code.replace(/load\s+File\.join\(__dir__.*?\)/g, '# [RAM Stripped load]');
+        code = code.replace(/HTML_FILE\s*=\s*File\.expand_path\(.*?\)/g, 'HTML_FILE = ""');
+        code = code.replace(/html_content\s*=\s*File\.read\(HTML_FILE.*?\)/g, 'html_content = ALU_DOOR_EMBEDDED_HTML');
+        code = code.replace(/File\.expand_path\(File\.join\(__dir__.*?\)\)/g, '""');
 
         bundledCode += `\n# --- BEGIN: ${file} ---\n` + code + `\n# --- END: ${file} ---\n`;
       }

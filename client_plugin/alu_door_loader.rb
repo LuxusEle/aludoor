@@ -53,39 +53,45 @@ module AluDoorCloudLoader
       password: saved_pwd
     })
 
+    response = nil
     begin
       response = http.request(request)
-      if response.code.to_i == 200
-        res_data = JSON.parse(response.body)
-        if res_data['success'] && res_data['code']
-          tokens_left = res_data['user']['tokens_remaining'] || 100
-          puts "=> [ALU DOOR Cloud] Authentication successful! Tokens: #{tokens_left} 6m Bars remaining."
-          
-          # Stream directly to RAM
+    rescue StandardError => net_err
+      UI.messagebox("❌ Network Error: Could not connect to #{endpoint}\n#{net_err.message}")
+      return
+    end
+
+    if response.code.to_i == 200
+      res_data = JSON.parse(response.body)
+      if res_data['success'] && res_data['code']
+        tokens_left = res_data['user']['tokens_remaining'] || 100
+        puts "=> [ALU DOOR Cloud] Authentication successful! Tokens: #{tokens_left} 6m Bars remaining."
+        
+        # Stream directly to RAM
+        begin
           eval(res_data['code'], TOPLEVEL_BINDING)
-        else
-          UI.messagebox("❌ Cloud Error: #{res_data['error'] || 'Unknown error'}")
+        rescue StandardError => eval_err
+          puts "=> [ALU DOOR Cloud] Runtime eval error: #{eval_err.message}"
+          puts eval_err.backtrace.join("\n")
+          UI.messagebox("❌ RAM Engine Execution Error:\n#{eval_err.message}")
         end
       else
-        begin
-          err_body = JSON.parse(response.body)
-          msg = err_body['error'] || "Server returned HTTP #{response.code}"
-        rescue
-          msg = "Server returned HTTP #{response.code}"
-        end
-
-        if response.code.to_i == 401
-          Sketchup.write_default('AluDoorCloud', 'user_pwd', '')
-          UI.messagebox("❌ Login Failed: #{msg}\n\nPlease check your email/password or create an account in the admin portal.")
-          return # STOP! Do not load app or fallback to guest mode.
-        else
-          UI.messagebox("❌ Cloud Stream Failed: #{msg}")
-          return
-        end
+        UI.messagebox("❌ Cloud Error: #{res_data['error'] || 'Unknown error'}")
       end
-    rescue StandardError => err
-      UI.messagebox("❌ Network Error: Could not connect to #{endpoint}\n#{err.message}")
-      return
+    else
+      begin
+        err_body = JSON.parse(response.body)
+        msg = err_body['error'] || "Server returned HTTP #{response.code}"
+      rescue
+        msg = "Server returned HTTP #{response.code}"
+      end
+
+      if response.code.to_i == 401
+        Sketchup.write_default('AluDoorCloud', 'user_pwd', '')
+        UI.messagebox("❌ Login Failed: #{msg}\n\nPlease check your email/password or create an account in the admin portal.")
+      else
+        UI.messagebox("❌ Cloud Stream Failed: #{msg}")
+      end
     end
   end
 
