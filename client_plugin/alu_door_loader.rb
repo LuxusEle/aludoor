@@ -75,23 +75,17 @@ module AluDoorCloudLoader
         end
 
         if response.code.to_i == 401
-          # Reset saved password so user can re-enter
           Sketchup.write_default('AluDoorCloud', 'user_pwd', '')
-          UI.messagebox("❌ Login Failed: #{msg}\nPlease launch again to re-enter credentials.")
+          UI.messagebox("❌ Login Failed: #{msg}\n\nPlease check your email/password or create an account in the admin portal.")
+          return # STOP! Do not load app or fallback to guest mode.
         else
           UI.messagebox("❌ Cloud Stream Failed: #{msg}")
+          return
         end
       end
     rescue StandardError => err
-      # Fallback to local pilot if offline/local development
-      local_pilot_main = File.expand_path(File.join(__dir__, '..', 'aludoor_pilot', 'aludoor_pilot', 'main.rb'))
-      if File.existsSync?(local_pilot_main)
-        puts "=> [ALU DOOR Cloud] Remote stream unavailable (#{err.message}). Loading local fallback..."
-        load local_pilot_main
-        AluDoorPilot::ReportDialog.show_report
-      else
-        UI.messagebox("❌ Network Error: Could not connect to #{endpoint}\n#{err.message}")
-      end
+      UI.messagebox("❌ Network Error: Could not connect to #{endpoint}\n#{err.message}")
+      return
     end
   end
 

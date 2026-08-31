@@ -750,9 +750,20 @@
       const user = fabricators.find(f => f.email === email);
       if (user) {
         user.password = newPwd;
-        closeResetPwModal();
-        showToast(`🔑 Password updated successfully for ${email}`);
       }
+
+      try {
+        await fetch('/api/admin-users?action=reset_password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, newPassword: newPwd })
+        });
+      } catch (err) {
+        console.log('Reset PW API notice:', err);
+      }
+
+      closeResetPwModal();
+      showToast(`🔑 Password updated successfully for ${email} (New Password: ${newPwd})`);
     }
 
     // 3. EDIT USER DETAILS

@@ -30,41 +30,35 @@ module AluDoorPilot
 
       if email.empty? || saved_pwd.empty? || force_auth_prompt
         prompts = ["Fabricator Email:", "Password:"]
-        defaults = [email.empty? ? "workshop@gmail.com" : email, ""]
-        input = UI.inputbox(prompts, defaults, "🔑 ALU DOOR 70S Pro — Supabase Sign In")
+        defaults = [email.empty? ? "luxuselemente@gmail.com" : email, ""]
+        input = UI.inputbox(prompts, defaults, "🔑 ALU DOOR 70S Pro — Fabricator Sign In")
         
-        if input
-          email = input[0].strip
-          saved_pwd = input[1].strip
+        if input.nil?
+          puts "=> [ALU DOOR Cloud] Sign-in cancelled by user. Operation stopped."
+          return
+        end
 
-          puts "=> [ALU DOOR Cloud] Authenticating #{email} with Supabase..."
-          res = AluDoorPilot::SupabaseAuth.sign_in(email, saved_pwd)
+        email = input[0].strip
+        saved_pwd = input[1].strip
 
-          if res[:success]
-            tokens = res.dig(:user, 'user_metadata', 'tokens') || 100
-            Sketchup.write_default('AluDoorCloud', 'user_email', email)
-            Sketchup.write_default('AluDoorCloud', 'user_pwd', saved_pwd)
-            Sketchup.write_default('AluDoorCloud', 'user_tokens', tokens)
-            UI.messagebox("✅ Supabase Login Successful!\n\nFabricator: #{email}\nActive Quota: #{tokens} Bar Tokens (6000mm)")
-          else
-            # Try automatic signup for new fabricators with 100 free tokens
-            puts "=> [ALU DOOR Cloud] Account not found, registering new fabricator..."
-            signup_res = AluDoorPilot::SupabaseAuth.sign_up(email, saved_pwd)
-            if signup_res[:success]
-              tokens = 100
-              Sketchup.write_default('AluDoorCloud', 'user_email', email)
-              Sketchup.write_default('AluDoorCloud', 'user_pwd', saved_pwd)
-              Sketchup.write_default('AluDoorCloud', 'user_tokens', tokens)
-              UI.messagebox("🎉 Welcome to ALU DOOR 70S Pro!\n\nNew Account Created: #{email}\n100 Free 6.0m Bar Tokens Credited.")
-            else
-              UI.messagebox("❌ Login Failed: #{res[:error] || 'Invalid credentials'}\nProceeding in Guest Mode.")
-              email = "guest@aludoor.com"
-              tokens = 100
-            end
-          end
+        if email.empty? || saved_pwd.empty?
+          UI.messagebox("❌ Sign-in Error: Email and password cannot be empty.")
+          return
+        end
+
+        puts "=> [ALU DOOR Cloud] Authenticating #{email} with Supabase..."
+        res = AluDoorPilot::SupabaseAuth.sign_in(email, saved_pwd)
+
+        if res[:success]
+          tokens = res.dig(:user, 'user_metadata', 'tokens') || 100
+          Sketchup.write_default('AluDoorCloud', 'user_email', email)
+          Sketchup.write_default('AluDoorCloud', 'user_pwd', saved_pwd)
+          Sketchup.write_default('AluDoorCloud', 'user_tokens', tokens)
+          UI.messagebox("✅ Supabase Login Successful!\n\nFabricator: #{email}\nActive Quota: #{tokens} Bar Tokens (6000mm)")
         else
-          email = "guest@aludoor.com"
-          tokens = 100
+          UI.messagebox("❌ Login Failed: #{res[:error] || 'Invalid credentials'}\n\nPlease check your email/password or create an account in the admin portal.")
+          Sketchup.write_default('AluDoorCloud', 'user_pwd', '')
+          return # STOP COMPLETELY! Do not proceed or open app in guest mode.
         end
       else
         tokens = Sketchup.read_default('AluDoorCloud', 'user_tokens', 100)
