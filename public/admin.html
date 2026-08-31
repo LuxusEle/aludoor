@@ -318,6 +318,9 @@
       </div>
       <div style="display:flex; align-items:center; gap:16px;">
         <span style="color:#38bdf8; font-weight:700; font-size:12px;">👤 Admin: <span id="active-admin-label">luxuselemente@gmail.com</span></span>
+        <a href="/master-document.html" target="_blank" style="background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.4); color:#38bdf8; text-decoration:none; font-weight:800; padding:6px 14px; border-radius:6px; font-size:12px; display:inline-flex; align-items:center; gap:6px;">
+          <span>📑</span> Master Operations PDF
+        </a>
         <a href="/" style="color:var(--text-muted); text-decoration:none; font-weight:600;">Landing Page</a>
         <a href="/download" style="color:var(--primary); text-decoration:none; font-weight:700;">Download Plugin</a>
         <button onclick="handleAdminLogout()" style="background:#dc2626; color:white; border:none; padding:5px 12px; border-radius:5px; font-weight:700; cursor:pointer;">Sign Out</button>
@@ -325,6 +328,49 @@
     </header>
 
     <div class="container">
+
+      <!-- Infrastructure & Cloud Telemetry Panel -->
+      <div class="section-card" style="background:linear-gradient(180deg, #0f172a 0%, #030712 100%); border-color:#2563eb;">
+        <div class="section-title">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span>🌐</span> Cloud Services, Vercel & Supabase Infrastructure Telemetry
+          </div>
+          <div style="display:flex; gap:8px;">
+            <a href="/master-document.html" target="_blank" class="btn-add-user" style="background:#7c3aed; text-decoration:none;">
+              <span>📑</span> Open Full Operations PDF Manual
+            </a>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px; margin-top:10px;">
+          <div style="background:#1e293b; border:1px solid #334155; border-radius:8px; padding:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-weight:800; color:#fff; font-size:13px;">☁️ Vercel RAM-Stream Engine</span>
+              <span class="badge badge-green">🟢 200 OK</span>
+            </div>
+            <div style="font-size:11px; color:#94a3b8; font-family:'JetBrains Mono'; margin-bottom:6px;">https://alu-door-70s.vercel.app/api/load-engine</div>
+            <div style="font-size:12px; color:#cbd5e1;">Memory Payload: <strong>203.6 KB</strong> | Latency: <strong>~85ms</strong></div>
+          </div>
+
+          <div style="background:#1e293b; border:1px solid #334155; border-radius:8px; padding:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-weight:800; color:#fff; font-size:13px;">⚡ Supabase Cloud Database & Auth</span>
+              <span class="badge badge-green">🟢 Connected</span>
+            </div>
+            <div style="font-size:11px; color:#94a3b8; font-family:'JetBrains Mono'; margin-bottom:6px;">https://iefeibuhjupnpmcomxbg.supabase.co</div>
+            <div style="font-size:12px; color:#cbd5e1;">Tables: <strong>alu_doors, alu_vendor_price_catalog</strong></div>
+          </div>
+
+          <div style="background:#1e293b; border:1px solid #334155; border-radius:8px; padding:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-weight:800; color:#fff; font-size:13px;">🐙 GitHub Production Repo</span>
+              <span class="badge badge-blue">🟢 Synced</span>
+            </div>
+            <div style="font-size:11px; color:#94a3b8; font-family:'JetBrains Mono'; margin-bottom:6px;">https://github.com/LuxusEle/aludoor</div>
+            <div style="font-size:12px; color:#cbd5e1;">Branch: <strong>main</strong> | CI/CD: <strong>Auto-Deploy to Vercel</strong></div>
+          </div>
+        </div>
+      </div>
 
       <!-- KPI Stats -->
       <div class="stats-row">

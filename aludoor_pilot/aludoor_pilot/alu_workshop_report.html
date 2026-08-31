@@ -972,10 +972,8 @@
     let selectedGlassVendor = 'Asahi Safety Glass';
     let glassSqFtRateLKR = 450.00;
 
-    // Clean Initial Project Schedule (Starts with 1 default opening)
-    let projectSchedule = [
-      { id: 1, tag: 'D1', system: '70S 2-Track Sliding Door', width: 1500, height: 2100, qty: 1 }
-    ];
+    // Clean Initial Project Schedule (Starts EMPTY on first run)
+    let projectSchedule = [];
 
     let isXRayMode = true;
     let lastCalculatedData = null;
@@ -1055,10 +1053,6 @@
     }
 
     function deleteScheduleItem(id) {
-      if (projectSchedule.length <= 1) {
-        alert("Project must have at least 1 opening.");
-        return;
-      }
       projectSchedule = projectSchedule.filter(item => item.id !== id);
       renderScheduleTable();
       recalculateLocalPayload();
@@ -1069,6 +1063,20 @@
       tbody.innerHTML = '';
       let totalOpenings = 0;
       let unitCounter = 1;
+
+      if (projectSchedule.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" style="text-align:center; padding:36px 20px; color:#94a3b8; font-size:13px;">
+              <div style="font-size:24px; margin-bottom:8px;">📋</div>
+              <strong>No openings in schedule yet.</strong><br>
+              <span style="font-size:11px; color:#64748b;">Enter Tag, Width, Height, and Quantity above, then click <strong>➕ Add Opening</strong> to add doors or windows.</span>
+            </td>
+          </tr>
+        `;
+        document.getElementById('val-total-openings').innerText = '0 Units';
+        return;
+      }
 
       projectSchedule.forEach(item => {
         const qty = parseInt(item.qty) || 1;

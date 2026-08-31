@@ -10,6 +10,10 @@
       "dest": "/admin.html"
     },
     {
+      "src": "/master-document",
+      "dest": "/master-document.html"
+    },
+    {
       "src": "/download",
       "dest": "/download.html"
     },

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ALU DOOR 70S Pro — Master Architecture & Operations Manual</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0f172a;
+      --accent: #2563eb;
+      --accent-light: #38bdf8;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #cbd5e1;
+      --card-bg: #f8fafc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #ffffff;
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 13.5px;
+      padding: 40px 20px;
+    }
+    .doc-container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+    }
+
+    /* Header & Cover */
+    .doc-cover {
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 24px;
+      margin-bottom: 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .doc-badge {
+      display: inline-block;
+      background: rgba(37, 99, 235, 0.1);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-weight: 800;
+      font-size: 11px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .doc-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+    .doc-subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+    .btn-print {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+    .btn-print:hover { background: #1d4ed8; }
+
+    /* Sections */
+    .section-block {
+      margin-bottom: 40px;
+      page-break-inside: avoid;
+    }
+    .section-heading {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary);
+      border-left: 4px solid var(--accent);
+      padding-left: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Tables */
+    table.spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 12.5px;
+    }
+    table.spec-table th {
+      background: #f1f5f9;
+      color: var(--primary);
+      font-weight: 800;
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 2px solid var(--border);
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+    table.spec-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: middle;
+    }
+    table.spec-table tr:nth-child(even) { background: #f8fafc; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Callout Card */
+    .info-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin: 16px 0;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .badge-tag {
+      background: #e2e8f0;
+      color: #334155;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* Print Styles */
+    @media print {
+      body { padding: 0; font-size: 11pt; background: #fff; }
+      .btn-print, .no-print { display: none !important; }
+      .doc-container { max-width: 100%; }
+      .section-block { page-break-inside: avoid; }
+      table.spec-table th { background: #e2e8f0 !important; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="doc-container">
+
+    <!-- Document Header / Cover -->
+    <div class="doc-cover">
+      <div>
+        <div class="doc-badge">🛡️ Confidential — Internal Operations & Engineering Document</div>
+        <h1 class="doc-title">ALU DOOR 70S Pro Platform</h1>
+        <div class="doc-subtitle">Master Architecture, Profile Tolerances, Live Vendor Matrix & Cloud Streaming Operations</div>
+      </div>
+      <div class="no-print">
+        <button class="btn-print" onclick="window.print()">
+          <span>🖨️</span> Print / Save as PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- 1. Executive Summary & Monetization -->
+    <div class="section-block">
+      <h2 class="section-heading"><span>1.</span> Platform Overview & Fabricator Monetization Engine</h2>
+      <p>
+        The <strong>ALU DOOR 70S Pro Platform</strong> is an enterprise-grade cloud engineering and cutting stock optimization system built specifically for the Sri Lankan aluminium architectural fabrication industry.
+      </p>
+      <div class="grid-3" style="margin-top:16px;">
+        <div class="info-card">
+          <div style="font-weight:800; color:var(--primary); font-size:14px; margin-bottom:4px;">1 Bar = 1 Token</div>
+          <div style="font-size:12px; color:var(--text-muted);">Direct consumption model: fabricators are billed exactly 1 Token for each 6.0m stock bar required by their schedule.</div>
+        </div>
+        <div class="info-card">
+          <div style="font-weight:800; color:var(--primary); font-size:14px; margin-bottom:4px;">100% RAM Streaming</div>
+          <div style="font-size:12px; color:var(--text-muted);">Proprietary vector CAD and nesting algorithms are streamed into RAM memory via Vercel serverless APIs (< 8 KB client footprint).</div>
+        </div>
+        <div class="info-card">
+          <div style="font-weight:800; color:var(--primary); font-size:14px; margin-bottom:4px;">Multi-Vendor PO Sync</div>
+          <div style="font-size:12px; color:var(--text-muted);">Real-time supplier pricing catalogs for Alumex PLC, Amex Aluminium, Swisstek Aluminium, Hardware Lanka, and Asahi Safety Glass.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Technical Profile Catalog & Vector Specs -->
+    <div class="section-block">
+      <h2 class="section-heading"><span>2.</span> 70S Vector Profile Specifications & Technical Tolerances</h2>
+      <p>All profiles are precision-modeled from verified factory DXF die stencils with exact screw C-channels, glass rebate depths, and roller housings:</p>
+      
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>Die Code</th>
+            <th>Component Description</th>
+            <th>Dimensions (W x D)</th>
+            <th>Linear Weight</th>
+            <th>Critical Engineering Features</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge-tag">70S-1001-1</span></td>
+            <td><strong>Outer Frame Head (3-Track)</strong></td>
+            <td class="mono">69.72 x 32.0 mm</td>
+            <td class="mono">0.940 kg/m</td>
+            <td>Dual screw C-channels (Y=17.94, Y=51.73), Solid Tool 25mm end-notch for jamb fit.</td>
+          </tr>
+          <tr>
+            <td><span class="badge-tag">70S-1101-1</span></td>
+            <td><strong>Outer Frame Sill (Threshold)</strong></td>
+            <td class="mono">69.71 x 29.96 mm</td>
+            <td class="mono">1.050 kg/m</td>
+            <td>Sloped water drainage, raised V-groove track beads for smooth roller carriage glide.</td>
+          </tr>
+          <tr>
+            <td><span class="badge-tag">70S-1201-1</span></td>
+            <td><strong>Outer Frame Side Jambs</strong></td>
+            <td class="mono">69.70 x 24.80 mm</td>
+            <td class="mono">0.750 kg/m</td>
+            <td>Internal locking jamb channel with pre-drilled horizontal screw access ports.</td>
+          </tr>
+          <tr>
+            <td><span class="badge-tag">70S-1401</span></td>
+            <td><strong>Sash Top Rail</strong></td>
+            <td class="mono">47.50 x 28.00 mm</td>
+            <td class="mono">0.520 kg/m</td>
+            <td>Deep 18mm glass pocket with dual EPDM gasket grooves and woolpile weatherstrip channels.</td>
+          </tr>
+          <tr>
+            <td><span class="badge-tag">70S-1501</span></td>
+            <td><strong>Sash Bottom Rail</strong></td>
+            <td class="mono">47.50 x 52.00 mm</td>
+            <td class="mono">0.710 kg/m</td>
+            <td>Heavy-duty hollow cavity designed for concealed snap-in V-Groove Roller Carriages (70S-1914).</td>
+          </tr>
+          <tr>
+            <td><span class="badge-tag">70S-1601</span></td>
+            <td><strong>Meeting Interlock Stile</strong></td>
+            <td class="mono">38.50 x 32.40 mm</td>
+            <td class="mono">0.580 kg/m</td>
+            <td>Dual interlocking hook design with continuous woolpile barrier against monsoon wind & rain.</td>
+          </tr>
+          <tr>
+            <td><span class="badge-tag">70S-1701</span></td>
+            <td><strong>Sash Handle Stile</strong></td>
+            <td class="mono">32.40 x 26.00 mm</td>
+            <td class="mono">0.490 kg/m</td>
+            <td>Concealed flush pull handle recess and internal screw spline for rigid corner joining.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 3. Live Vendor Pricing Matrix (Sri Lanka LKR) -->
+    <div class="section-block">
+      <h2 class="section-heading"><span>3.</span> Master Vendor Price Catalogs & PO Matrix (Sri Lanka Market)</h2>
+      <p>Current active supplier unit rates synced directly to Supabase cloud database:</p>
+
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>Die Code</th>
+            <th>Description</th>
+            <th>Alumex PLC (6m)</th>
+            <th>Amex Aluminium (6m)</th>
+            <th>Swisstek Aluminium (6m)</th>
+            <th>Standard Unit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge-tag">70S-1001-1</span></td>
+            <td>Top Frame Head</td>
+            <td class="mono" style="font-weight:700; color:#047857;">Rs. 8,500.00</td>
+            <td class="mono">Rs. 8,200.00</td>
+            <td class="mono">Rs. 8,400.00</td>
+            <td>Per 6.0m Bar</td>
+          </tr>
+          <tr>
+            <td><span class="badge-tag">70S-1101-1</span></td>
+            <td>Bottom Frame Sill</td>
+            <td class="mono" style="font-weight:700; color:#047857;">Rs. 9,200.00</td>
+            <td class="mono">Rs. 8,900.00</td>
+            <td class="mono">Rs. 9,100.00</td>
+            <td>Per 6.0m Bar</td>
+          </tr>
+          <tr>
+            <td><span class="badge-tag">70S-1201-1</span></td>
+            <td>Frame Side Jambs</td>
+            <td class="mono" style="font-weight:700; color:#047857;">Rs. 6,800.00</td>
+            <td class="mono">Rs. 6,600.00</td>
+            <td class="mono">Rs. 6,750.00</td>
+            <td>Per 6.0m Bar</td>
+          </tr>
+          <tr>
+            <td><span class="badge-tag">70S-1401</span></td>
+            <td>Sash Top Rail</td>
+            <td class="mono" style="font-weight:700; color:#047857;">Rs. 4,500.00</td>
+            <td class="mono">Rs. 4,350.00</td>
+            <td class="mono">Rs. 4,450.00</td>
+            <td>Per 6.0m Bar</td>
+          </tr>
+          <tr>
+            <td><span class="badge-tag">70S-1501</span></td>
+            <td>Sash Bottom Rail</td>
+            <td class="mono" style="font-weight:700; color:#047857;">Rs. 6,200.00</td>
+            <td class="mono">Rs. 5,950.00</td>
+            <td class="mono">Rs. 6,100.00</td>
+            <td>Per 6.0m Bar</td>
+          </tr>
+          <tr>
+            <td><span class="badge-tag">70S-1601</span></td>
+            <td>Meeting Interlock</td>
+            <td class="mono" style="font-weight:700; color:#047857;">Rs. 4,800.00</td>
+            <td class="mono">Rs. 4,650.00</td>
+            <td class="mono">Rs. 4,750.00</td>
+            <td>Per 6.0m Bar</td>
+          </tr>
+          <tr>
+            <td><span class="badge-tag">70S-1701</span></td>
+            <td>Sash Handle Stile</td>
+            <td class="mono" style="font-weight:700; color:#047857;">Rs. 4,200.00</td>
+            <td class="mono">Rs. 4,050.00</td>
+            <td class="mono">Rs. 4,150.00</td>
+            <td>Per 6.0m Bar</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Hardware & Glass Specs -->
+      <div class="grid-2" style="margin-top:16px;">
+        <div class="info-card">
+          <div style="font-weight:800; color:var(--primary); margin-bottom:8px;">🔩 Hardware & Accessories (Hardware Lanka)</div>
+          <ul style="font-size:12px; list-style:none; line-height:1.8;">
+            <li>• <strong>70S-1914:</strong> V-Groove Ball-Bearing Roller — <span class="mono">Rs. 1,250 / pc</span></li>
+            <li>• <strong>ST-4.2x38:</strong> Stainless Steel Fastener Screws — <span class="mono">Rs. 15 / pc</span></li>
+            <li>• <strong>WP-7x6:</strong> Wool Pile Weatherstrip Seal — <span class="mono">Rs. 85 / meter</span></li>
+            <li>• <strong>EPDM-10:</strong> Glazing Cushioning Gasket — <span class="mono">Rs. 120 / meter</span></li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <div style="font-weight:800; color:var(--primary); margin-bottom:8px;">🪟 Safety Glass (Asahi Safety Glass)</div>
+          <ul style="font-size:12px; list-style:none; line-height:1.8;">
+            <li>• <strong>6mm Clear Float Glass:</strong> <span class="mono">Rs. 450.00 / sq.ft</span></li>
+            <li>• <strong>6mm Toughened Safety Glass:</strong> <span class="mono">Rs. 750.00 / sq.ft</span></li>
+            <li>• <strong>8mm Clear Float Glass:</strong> <span class="mono">Rs. 620.00 / sq.ft</span></li>
+            <li>• <strong>Standard Rebate Deduction:</strong> <span class="mono">Glass W = (W+28)/2 - 40mm, H = H - 96mm</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 1D Linear Nesting & Cut Stock Logic -->
+    <div class="section-block">
+      <h2 class="section-heading"><span>4.</span> 1D Linear Nesting & Cutting Optimization Formulas</h2>
+      <div class="info-card">
+        <p style="margin-bottom:10px;">
+          The system implements a deterministic First-Fit Decreasing (FFD) linear nesting algorithm with exact saw kerf compensation:
+        </p>
+        <div class="grid-3" style="font-size:12px;">
+          <div>• <strong>Stock Length:</strong> <span class="mono">6000.0 mm</span></div>
+          <div>• <strong>Saw Blade Kerf:</strong> <span class="mono">3.5 mm</span></div>
+          <div>• <strong>Cut Angles:</strong> <span class="mono">90° / 45°</span></div>
+          <div>• <strong>Minimum Usable Offcut:</strong> <span class="mono">≥ 500.0 mm</span></div>
+          <div>• <strong>Average Yield:</strong> <span class="mono">92% - 96%</span></div>
+          <div>• <strong>Sequential Unit Labeling:</strong> <span class="mono">#01, #02..#09</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Cloud Architecture & Infrastructure Telemetry -->
+    <div class="section-block">
+      <h2 class="section-heading"><span>5.</span> Cloud Architecture & Security Endpoints</h2>
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>Infrastructure Layer</th>
+            <th>Endpoint / Provider</th>
+            <th>Protocol</th>
+            <th>Security & Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Cloud RAM Streamer</strong></td>
+            <td><span class="mono">https://alu-door-70s.vercel.app/api/load-engine</span></td>
+            <td><span class="badge-tag">HTTPS POST</span></td>
+            <td>Serverless runtime bundler, checks bar token quota, returns in-memory Ruby AST.</td>
+          </tr>
+          <tr>
+            <td><strong>Master Admin Console</strong></td>
+            <td><span class="mono">https://alu-door-70s.vercel.app/admin</span></td>
+            <td><span class="badge-tag">Web Portal</span></td>
+            <td>Master password gate (<span class="mono">luxuselemente@gmail.com</span>), full fabricator CRUD & token controls.</td>
+          </tr>
+          <tr>
+            <td><strong>Supabase Cloud Auth</strong></td>
+            <td><span class="mono">https://iefeibuhjupnpmcomxbg.supabase.co/auth/v1</span></td>
+            <td><span class="badge-tag">JWT Bearer</span></td>
+            <td>Fabricator identity management, token quotas in user metadata.</td>
+          </tr>
+          <tr>
+            <td><strong>Supabase PostgreSQL</strong></td>
+            <td><span class="mono">https://iefeibuhjupnpmcomxbg.supabase.co/rest/v1/alu_doors</span></td>
+            <td><span class="badge-tag">PostgREST</span></td>
+            <td>Live cloud sync for fabricator project quotes, hardware BOMs, and vendor price history.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Sign-Off Footer -->
+    <div style="border-top:2px solid var(--border); padding-top:20px; display:flex; justify-content:space-between; color:var(--text-muted); font-size:11px;">
+      <div>ALU DOOR 70S Pro Platform — Engineering Division</div>
+      <div>Luxus Elemente Sri Lanka © 2026. All rights reserved.</div>
+    </div>
+
+  </div>
+
+</body>
+</html>
