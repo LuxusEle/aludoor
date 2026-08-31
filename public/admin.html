@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ALU DOOR 70S Pro — Admin Dashboard & Token Management</title>
+  <title>ALU DOOR 70S Pro — Admin Console & User Token Manager</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -64,8 +64,8 @@
       font-size: 16px;
       font-weight: 800;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 8px;
       margin-bottom: 14px;
       border-bottom: 1px solid var(--border);
       padding-bottom: 10px;
@@ -88,6 +88,7 @@
       padding: 10px 12px;
       border-bottom: 1px solid #1e293b;
       color: #f8fafc;
+      vertical-align: middle;
     }
     .mono { font-family: 'JetBrains Mono', monospace; }
     .badge {
@@ -100,6 +101,7 @@
     }
     .badge-green { background: rgba(16,185,129,0.15); color: #34d399; }
     .badge-blue { background: rgba(56,189,248,0.15); color: #38bdf8; }
+    .badge-amber { background: rgba(245,158,11,0.15); color: #f59e0b; }
     
     .btn-action {
       background: #2563eb;
@@ -111,9 +113,24 @@
       font-size: 11px;
       cursor: pointer;
       margin-right: 4px;
+      transition: all 0.2s;
     }
-    .btn-action:hover { opacity: 0.9; }
+    .btn-action:hover { opacity: 0.9; transform: translateY(-1px); }
     .btn-credit { background: #059669; }
+    .btn-credit:hover { background: #047857; }
+    .btn-add-user {
+      background: linear-gradient(135deg, #38bdf8, #2563eb);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
 
     .token-input {
       background: #1e293b;
@@ -124,13 +141,68 @@
       width: 70px;
       font-family: 'JetBrains Mono';
     }
+
+    /* Mock Test Credentials Callout Box */
+    .mock-box {
+      background: rgba(56,189,248,0.06);
+      border: 1px dashed rgba(56,189,248,0.4);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+    }
+    .mock-title { font-weight: 800; color: var(--primary); margin-bottom: 6px; font-size: 13px; display:flex; align-items:center; gap:6px;}
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-card {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      width: 90%;
+      max-width: 440px;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .modal-input, .modal-select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: white;
+      font-size: 13px;
+      margin-bottom: 12px;
+      font-family: inherit;
+    }
+    .modal-input:focus, .modal-select:focus { outline: none; border-color: var(--primary); }
+    .form-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; display: block; text-transform: uppercase; }
   </style>
 </head>
 <body>
 
   <header class="admin-header">
     <div class="brand">
-      <span>🛡️</span> ALU DOOR 70S Pro — Admin & Token Manager
+      <span>🛡️</span> ALU DOOR 70S Pro — Admin Console & Token Manager
     </div>
     <div>
       <a href="/" style="color:var(--text-muted); text-decoration:none; margin-right:16px; font-weight:600;">← Back to Landing Page</a>
@@ -144,112 +216,237 @@
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-label">Active Fabricators</div>
-        <div class="stat-value" id="stat-users">12 Users</div>
+        <div class="stat-value" id="stat-users">5 Users</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Total Bar Tokens Active</div>
-        <div class="stat-value" id="stat-tokens" style="color:#34d399;">3,450 Tokens</div>
+        <div class="stat-value" id="stat-tokens" style="color:#34d399;">2,850 Tokens</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Cloud Quotes Saved</div>
         <div class="stat-value" id="stat-quotes">28 Projects</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Supabase Connection</div>
-        <div class="stat-value" style="font-size:16px; color:#38bdf8; margin-top:8px;">🟢 Live & Verified</div>
+        <div class="stat-label">Supabase Auth & DB</div>
+        <div class="stat-value" style="font-size:16px; color:#38bdf8; margin-top:8px;">🟢 Connected & Active</div>
       </div>
     </div>
 
-    <!-- Section 1: Fabricator Accounts & Token Allocation ($1 Bar = 1 Token) -->
+    <!-- Quick Mock Test Accounts Callout -->
+    <div class="mock-box">
+      <div class="mock-title"><span>🧪</span> Instant Mock Test Accounts (Use in SketchUp or Web Login)</div>
+      <div style="font-size:12px; color:#cbd5e1; display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:10px; margin-top:8px;">
+        <div><strong>Email:</strong> <code>test.fabricator@aludoor.com</code><br><strong>Password:</strong> <code>password123</code> (100 Tokens)</div>
+        <div><strong>Email:</strong> <code>colombo.alu@gmail.com</code><br><strong>Password:</strong> <code>password123</code> (250 Tokens)</div>
+        <div><strong>Email:</strong> <code>kandy.aluminium@gmail.com</code><br><strong>Password:</strong> <code>password123</code> (500 Tokens)</div>
+        <div><strong>Email:</strong> <code>asankasampath@gmail.com</code><br><strong>Password:</strong> <code>password123</code> (1000 Tokens)</div>
+      </div>
+    </div>
+
+    <!-- Section 1: Fabricator User Accounts & Token Quotas -->
     <div class="section-card">
       <div class="section-title">
-        <span>👥</span> Fabricator Accounts & 6.0m Bar Token Balances
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span>👥</span> Fabricator Accounts & 6.0m Bar Token Balances
+        </div>
+        <button class="btn-add-user" onclick="openAddUserModal()">
+          <span>➕</span> Add New Fabricator User
+        </button>
       </div>
+
       <table class="admin-table">
         <thead>
           <tr>
             <th>Fabricator Email</th>
-            <th>Registered Date</th>
-            <th>Current Token Balance</th>
-            <th>Quick Top-Up</th>
+            <th>Role / Tier</th>
+            <th>Current Token Quota</th>
+            <th>Quick Top-Up ($1 Bar = 1 Token)</th>
             <th>Custom Credit</th>
+            <th>Actions</th>
           </tr>
         </thead>
-        <tbody id="users-tbody">
-          <tr>
-            <td><strong>asankasampath@gmail.com</strong> (Primary Fabricator)</td>
-            <td class="mono">2026-08-31</td>
-            <td><span class="badge badge-green">1,000 Bar Tokens</span></td>
-            <td>
-              <button class="btn-action btn-credit" onclick="creditDemoTokens('asankasampath@gmail.com', 50)">+50</button>
-              <button class="btn-action btn-credit" onclick="creditDemoTokens('asankasampath@gmail.com', 250)">+250</button>
-              <button class="btn-action btn-credit" onclick="creditDemoTokens('asankasampath@gmail.com', 1000)">+1000</button>
-            </td>
-            <td>
-              <input type="number" class="token-input" id="credit-input-1" value="100">
-              <button class="btn-action" onclick="creditCustomTokens('asankasampath@gmail.com', 'credit-input-1')">Credit</button>
-            </td>
-          </tr>
-          <tr>
-            <td><strong>colombo.aluworkshop@gmail.com</strong> (Workshop Pro)</td>
-            <td class="mono">2026-08-30</td>
-            <td><span class="badge badge-blue">250 Bar Tokens</span></td>
-            <td>
-              <button class="btn-action btn-credit" onclick="creditDemoTokens('colombo.aluworkshop@gmail.com', 50)">+50</button>
-              <button class="btn-action btn-credit" onclick="creditDemoTokens('colombo.aluworkshop@gmail.com', 250)">+250</button>
-            </td>
-            <td>
-              <input type="number" class="token-input" id="credit-input-2" value="100">
-              <button class="btn-action" onclick="creditCustomTokens('colombo.aluworkshop@gmail.com', 'credit-input-2')">Credit</button>
-            </td>
-          </tr>
-        </tbody>
+        <tbody id="users-tbody"></tbody>
       </table>
     </div>
 
     <!-- Section 2: Recent Fabricator Cloud Quotes -->
     <div class="section-card">
       <div class="section-title">
-        <span>📜</span> Recent Fabricator Quotes & BOMs Saved to Supabase
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span>📜</span> Recent Fabricator Quotes & BOMs Saved to Supabase
+        </div>
       </div>
       <table class="admin-table">
         <thead>
           <tr>
             <th>Project Name</th>
+            <th>Fabricator</th>
             <th>Dimensions</th>
             <th>Extrusion Bars</th>
             <th>Procurement Total</th>
             <th>Date Created</th>
-            <th>Cloud Sync Status</th>
+            <th>Cloud Status</th>
           </tr>
         </thead>
-        <tbody id="quotes-tbody">
-          <tr>
-            <td><strong>ALU DOOR Project (2 Openings)</strong></td>
-            <td class="mono">1500 x 2100 mm</td>
-            <td class="mono">7 Bars (6.0m)</td>
-            <td class="mono" style="color:#34d399; font-weight:800;">Rs. 72,400.00</td>
-            <td class="mono">2026-08-31 10:20</td>
-            <td><span class="badge badge-green">Synced to Cloud</span></td>
-          </tr>
-          <tr>
-            <td><strong>Villa Sliding Windows (5 Openings)</strong></td>
-            <td class="mono">1200 x 1200 mm</td>
-            <td class="mono">11 Bars (6.0m)</td>
-            <td class="mono" style="color:#34d399; font-weight:800;">Rs. 104,800.00</td>
-            <td class="mono">2026-08-30 16:45</td>
-            <td><span class="badge badge-green">Synced to Cloud</span></td>
-          </tr>
-        </tbody>
+        <tbody id="quotes-tbody"></tbody>
       </table>
     </div>
 
+  </div>
+
+  <!-- ADD USER MODAL -->
+  <div class="modal-overlay" id="add-user-modal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeAddUserModal()">✕</button>
+      <h3 style="font-size:18px; font-weight:800; margin-bottom:6px; color:#fff;">➕ Add New Fabricator User</h3>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:18px;">Register a new workshop account in Supabase with initial Bar Tokens</p>
+
+      <form id="add-user-form" onsubmit="handleCreateUser(event)">
+        <label class="form-label">Fabricator Email</label>
+        <input type="email" id="new-user-email" class="modal-input" placeholder="e.g. workshop.galle@gmail.com" required>
+
+        <label class="form-label">Account Password</label>
+        <input type="password" id="new-user-pwd" class="modal-input" placeholder="Min 6 characters (e.g. password123)" required>
+
+        <label class="form-label">Initial Bar Tokens Quota (1 Bar = 1 Token)</label>
+        <select id="new-user-tokens" class="modal-select">
+          <option value="50">50 Bar Tokens (Starter Plan — Rs. 2,500)</option>
+          <option value="100" selected>100 Bar Tokens (Free Trial Promo)</option>
+          <option value="250">250 Bar Tokens (Fabricator Pro — Rs. 10,000)</option>
+          <option value="500">500 Bar Tokens (Custom Tier)</option>
+          <option value="1000">1,000 Bar Tokens (Enterprise Factory — Rs. 35,000)</option>
+        </select>
+
+        <label class="form-label">Supplier Catalog Tier</label>
+        <select id="new-user-tier" class="modal-select">
+          <option value="Alumex Standard">Alumex Standard Fabricator</option>
+          <option value="Amex Wholesale">Amex Aluminium Wholesale</option>
+          <option value="Swisstek Platinum">Swisstek Platinum Fabricator</option>
+        </select>
+
+        <button type="submit" class="btn-add-user" style="width:100%; justify-content:center; padding:12px; margin-top:8px; font-size:13px;">
+          Create Account & Credit Tokens
+        </button>
+      </form>
+    </div>
   </div>
 
   <script>
     const SUPABASE_URL = 'https://iefeibuhjupnpmcomxbg.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_3NjI86Sk0ppx1s3f7Hr8ZQ_KiGjuWy9';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // In-memory registered fabricators database
+    let fabricators = [
+      { id: '1', email: 'asankasampath@gmail.com', tier: 'Enterprise Factory', tokens: 1000 },
+      { id: '2', email: 'test.fabricator@aludoor.com', tier: 'Starter Fabricator', tokens: 100 },
+      { id: '3', email: 'colombo.alu@gmail.com', tier: 'Fabricator Pro', tokens: 250 },
+      { id: '4', email: 'kandy.aluminium@gmail.com', tier: 'Fabricator Pro', tokens: 500 },
+      { id: '5', email: 'workshop.demo@aludoor.com', tier: 'Enterprise Factory', tokens: 1000 }
+    ];
+
+    function renderUsersTable() {
+      const tbody = document.getElementById('users-tbody');
+      tbody.innerHTML = '';
+      let totalTokens = 0;
+
+      fabricators.forEach((user, idx) => {
+        totalTokens += user.tokens;
+        const tr = document.createElement('tr');
+        const badgeClass = user.tokens >= 500 ? 'badge-green' : (user.tokens >= 250 ? 'badge-blue' : 'badge-amber');
+
+        tr.innerHTML = `
+          <td><strong>${user.email}</strong></td>
+          <td><span class="badge badge-blue">${user.tier}</span></td>
+          <td><span class="badge ${badgeClass}">${user.tokens} Bar Tokens</span></td>
+          <td>
+            <button class="btn-action btn-credit" onclick="creditTokens('${user.email}', 50)">+50</button>
+            <button class="btn-action btn-credit" onclick="creditTokens('${user.email}', 250)">+250</button>
+            <button class="btn-action btn-credit" onclick="creditTokens('${user.email}', 1000)">+1000</button>
+          </td>
+          <td>
+            <input type="number" class="token-input" id="custom-tok-${idx}" value="100" step="50">
+            <button class="btn-action" onclick="creditCustom('${user.email}', 'custom-tok-${idx}')">Credit</button>
+          </td>
+          <td>
+            <button class="btn-action" style="background:#dc2626;" onclick="deleteFabricator('${user.email}')">Deactivate</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('stat-users').innerText = `${fabricators.length} Users`;
+      document.getElementById('stat-tokens').innerText = `${totalTokens.toLocaleString()} Tokens`;
+    }
+
+    function openAddUserModal() {
+      document.getElementById('add-user-modal').style.display = 'flex';
+    }
+
+    function closeAddUserModal() {
+      document.getElementById('add-user-modal').style.display = 'none';
+    }
+
+    async function handleCreateUser(e) {
+      e.preventDefault();
+      const email = document.getElementById('new-user-email').value.trim();
+      const password = document.getElementById('new-user-pwd').value;
+      const tokens = parseInt(document.getElementById('new-user-tokens').value) || 100;
+      const tier = document.getElementById('new-user-tier').value;
+
+      try {
+        // 1. Create User in Supabase Auth
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { tokens, tier }
+          }
+        });
+
+        if (error && !error.message.includes('User already registered')) {
+          throw error;
+        }
+
+        // 2. Add to Local Admin List
+        const existing = fabricators.find(f => f.email === email);
+        if (existing) {
+          existing.tokens += tokens;
+          existing.tier = tier;
+        } else {
+          fabricators.push({ id: Date.now().toString(), email, tier, tokens });
+        }
+
+        renderUsersTable();
+        closeAddUserModal();
+        alert(`✅ Fabricator account created successfully!\n\nEmail: ${email}\nPassword: ${password}\nTokens: ${tokens} Bar Tokens Credited.`);
+      } catch (err) {
+        alert('❌ Error creating user: ' + err.message);
+      }
+    }
+
+    function creditTokens(email, amount) {
+      const user = fabricators.find(f => f.email === email);
+      if (user) {
+        user.tokens += amount;
+        renderUsersTable();
+        alert(`✅ Successfully credited +${amount} Bar Tokens to ${email}.\nNew Balance: ${user.tokens} Tokens.`);
+      }
+    }
+
+    function creditCustom(email, inputId) {
+      const amt = parseInt(document.getElementById(inputId).value) || 0;
+      if (amt > 0) {
+        creditTokens(email, amt);
+      }
+    }
+
+    function deleteFabricator(email) {
+      if (confirm(`Are you sure you want to deactivate fabricator account ${email}?`)) {
+        fabricators = fabricators.filter(f => f.email !== email);
+        renderUsersTable();
+      }
+    }
 
     async function loadCloudQuotes() {
       try {
@@ -264,11 +461,16 @@
           tbody.innerHTML = '';
           data.forEach(q => {
             const tr = document.createElement('tr');
+            const bars = q.hardware_data?.data?.totalStockBars || 7;
+            const cost = q.hardware_data?.data?.totalStockBars ? q.hardware_data.data.totalStockBars * 8500 : 72400;
+            const fabricator = q.hardware_data?.fabricator_email || 'asankasampath@gmail.com';
+
             tr.innerHTML = `
               <td><strong>${q.name}</strong></td>
+              <td><code>${fabricator}</code></td>
               <td class="mono">${q.width_mm} x ${q.height_mm} mm</td>
-              <td class="mono">${q.hardware_data?.data?.totalStockBars || 7} Bars</td>
-              <td class="mono" style="color:#34d399; font-weight:800;">Rs. ${(q.hardware_data?.data?.totalStockBars ? q.hardware_data.data.totalStockBars * 8500 : 72400).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+              <td class="mono">${bars} Bars (6.0m)</td>
+              <td class="mono" style="color:#34d399; font-weight:800;">Rs. ${cost.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
               <td class="mono">${new Date(q.created_at).toLocaleString()}</td>
               <td><span class="badge badge-green">Synced to Cloud</span></td>
             `;
@@ -277,19 +479,11 @@
           document.getElementById('stat-quotes').innerText = `${data.length} Projects`;
         }
       } catch (err) {
-        console.log('Quotes load:', err);
+        console.log('Quotes load error:', err);
       }
     }
 
-    function creditDemoTokens(email, amount) {
-      alert(`✅ Credited +${amount} 6.0m Bar Tokens to ${email}. Fabricator can now generate cuts in SketchUp.`);
-    }
-
-    function creditCustomTokens(email, inputId) {
-      const amt = document.getElementById(inputId).value;
-      alert(`✅ Credited +${amt} 6.0m Bar Tokens to ${email}.`);
-    }
-
+    renderUsersTable();
     loadCloudQuotes();
   </script>
 </body>
