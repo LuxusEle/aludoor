@@ -239,10 +239,10 @@
       <form onsubmit="handleAdminLogin(event)">
         <div style="text-align:left;">
           <label class="form-label">Master Admin Email</label>
-          <input type="email" id="admin-email-input" class="modal-input" value="asankasampath@gmail.com" required>
+          <input type="email" id="admin-email-input" class="modal-input" value="luxuselemente@gmail.com" required>
 
           <label class="form-label">Admin Security Password / PIN</label>
-          <input type="password" id="admin-pwd-input" class="modal-input" value="password123" required>
+          <input type="password" id="admin-pwd-input" class="modal-input" value="123@Nibm" required>
         </div>
 
         <button type="submit" class="btn-add-user" style="width:100%; justify-content:center; padding:12px; font-size:14px; margin-top:8px;">
@@ -252,7 +252,7 @@
 
       <div style="margin-top:18px; padding-top:16px; border-top:1px solid #1e293b;">
         <button onclick="quickAdminLogin()" style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); color:#38bdf8; font-weight:700; padding:8px 14px; border-radius:6px; font-size:12px; cursor:pointer;">
-          ⚡ 1-Click Master Admin Login
+          ⚡ 1-Click Master Admin Login (luxuselemente@gmail.com)
         </button>
       </div>
 
@@ -404,6 +404,7 @@
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let fabricators = [
+      { id: '0', email: 'luxuselemente@gmail.com', tier: 'Super Admin', tokens: 99999 },
       { id: '1', email: 'asankasampath@gmail.com', tier: 'Enterprise Factory', tokens: 1000 },
       { id: '2', email: 'test.fabricator@aludoor.com', tier: 'Starter Fabricator', tokens: 100 },
       { id: '3', email: 'colombo.alu@gmail.com', tier: 'Fabricator Pro', tokens: 250 },
@@ -414,7 +415,7 @@
     // Admin Auth State Check
     function checkAdminAuth() {
       const isAuth = sessionStorage.getItem('alu_admin_logged_in');
-      const adminEmail = sessionStorage.getItem('alu_admin_email') || 'asankasampath@gmail.com';
+      const adminEmail = sessionStorage.getItem('alu_admin_email') || 'luxuselemente@gmail.com';
 
       if (isAuth === 'true') {
         document.getElementById('admin-login-view').style.display = 'none';
@@ -433,18 +434,18 @@
       const email = document.getElementById('admin-email-input').value.trim();
       const pwd = document.getElementById('admin-pwd-input').value;
 
-      if (pwd === 'password123' || pwd === 'admin123' || pwd.length >= 6) {
+      if (pwd === '123@Nibm' || pwd === 'pasword-123@Nibm' || pwd === 'password123' || pwd === 'admin123' || pwd.length >= 6) {
         sessionStorage.setItem('alu_admin_logged_in', 'true');
         sessionStorage.setItem('alu_admin_email', email);
         checkAdminAuth();
       } else {
-        alert('❌ Invalid admin password. Use password123');
+        alert('❌ Invalid admin password. Use 123@Nibm');
       }
     }
 
     function quickAdminLogin() {
       sessionStorage.setItem('alu_admin_logged_in', 'true');
-      sessionStorage.setItem('alu_admin_email', 'asankasampath@gmail.com');
+      sessionStorage.setItem('alu_admin_email', 'luxuselemente@gmail.com');
       checkAdminAuth();
     }
 
