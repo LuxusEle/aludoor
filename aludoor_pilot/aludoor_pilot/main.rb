@@ -579,22 +579,13 @@ module AluDoorPilot
 
     unless file_loaded?(__FILE__)
       menu = UI.menu('Extensions').add_submenu(PLUGIN_NAME)
+      menu.add_item('⚡ Launch 70S Workshop & PO Engine (Auth Activated)') { AluDoorPilot::ReportDialog.show_report(1500.0, 2100.0, false) }
+      menu.add_item('🔑 Switch Fabricator Account (Sign Out)') { AluDoorPilot::ReportDialog.logout }
+      menu.add_separator
       menu.add_item('📑 70S Workshop Report & 1D Bar Nesting Plan') { AluDoorPilot::ReportDialog.show_interactive }
       menu.add_item('🌟 70S Sliding Door Full System App') { AluDoorPilot::System70S.run_app_interactive }
       menu.add_item('📊 Export 70S BOM (Bill of Materials)') { AluDoorPilot::System70S.export_bom_csv(1500.0, 2100.0) }
       menu.add_item('📐 Export 70S 1D Bar Nesting Cutlist') { AluDoorPilot::System70S.export_nesting_csv(1500.0, 2100.0) }
-      menu.add_item('☁️ Supabase Cloud Sync (Save 70S Door)') {
-        prompts = ['Door Name', 'Width (mm)', 'Height (mm)']
-        defaults = ['70S Sliding Door Unit 1', 1500.0, 2100.0]
-        vals = UI.inputbox(prompts, defaults, 'Supabase Cloud Sync')
-        if vals
-          name, w, h = vals[0], vals[1].to_f, vals[2].to_f
-          data = AluDoorPilot::System70S.calculate_system_data(w, h)
-          nesting = AluDoorPilot::System70S.generate_nesting_payload(w, h)
-          res = AluDoorPilot::SupabaseAuth.save_door_to_cloud(name, w, h, data, nesting)
-          UI.messagebox("Door and BOM successfully synced to Supabase Cloud Database!\n\nProject: https://iefeibuhjupnpmcomxbg.supabase.co")
-        end
-      }
       menu.add_separator
       menu.add_item('Complete 70S Sliding Door (Frame + Sashes + Glass)') { AluDoorPilot::Profiles70SCleanDXF.build_70s_sliding_door_interactive }
       menu.add_item('70S Door Sliders ONLY (Sashes + Glass + Rollers)') { AluDoorPilot::Profiles70SCleanDXF.sliders_70mm_interactive }

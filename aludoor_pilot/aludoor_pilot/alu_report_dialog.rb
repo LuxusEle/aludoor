@@ -2,11 +2,12 @@
 # ALU DOOR PILOT - MULTI-OPENING PROJECT MANAGER & VENDOR PO REPORT DIALOG
 # -----------------------------------------------------------------------------
 # Launches the interactive HTML workshop production & procurement pack:
-# 1. Multi-door project schedule manager (D1, D2, W1, etc.) with Unit Numbering.
-# 2. Batch 3D model generator in SketchUp viewport (user-triggered).
-# 3. Live Supabase Auth & Bar Token deduction ($1 Bar = 1 Token).
-# 4. Vendor-wise Purchase Orders (Alumex/Amex per-bar LKR, Hardware, Glass).
-# 5. Direct 1-Click PDF download & Supabase Cloud Sync.
+# 1. Prompts for Supabase Sign In / Register on launch if not authenticated.
+# 2. Multi-door project schedule manager (D1, D2, W1, etc.) with Unit Numbering.
+# 3. Batch 3D model generator in SketchUp viewport (user-triggered).
+# 4. Live Supabase Auth & Bar Token deduction ($1 Bar = 1 Token).
+# 5. Vendor-wise Purchase Orders (Alumex/Amex per-bar LKR, Hardware, Glass).
+# 6. Direct 1-Click PDF download & Supabase Cloud Sync.
 # =============================================================================
 
 require 'sketchup.rb'
@@ -22,10 +23,57 @@ module AluDoorPilot
 
     HTML_FILE = File.expand_path(File.join(__dir__, 'alu_workshop_report.html'))
 
-    def show_report(_width_mm = 1500.0, _height_mm = 2100.0)
+    def show_report(_width_mm = 1500.0, _height_mm = 2100.0, force_auth_prompt = false)
+      # 1. Check Authentication Status
+      email = Sketchup.read_default('AluDoorCloud', 'user_email', '')
+      saved_pwd = Sketchup.read_default('AluDoorCloud', 'user_pwd', '')
+
+      if email.empty? || saved_pwd.empty? || force_auth_prompt
+        prompts = ["Fabricator Email:", "Password:"]
+        defaults = [email.empty? ? "workshop@gmail.com" : email, ""]
+        input = UI.inputbox(prompts, defaults, "🔑 ALU DOOR 70S Pro — Supabase Sign In")
+        
+        if input
+          email = input[0].strip
+          saved_pwd = input[1].strip
+
+          puts "=> [ALU DOOR Cloud] Authenticating #{email} with Supabase..."
+          res = AluDoorPilot::SupabaseAuth.sign_in(email, saved_pwd)
+
+          if res[:success]
+            tokens = res.dig(:user, 'user_metadata', 'tokens') || 100
+            Sketchup.write_default('AluDoorCloud', 'user_email', email)
+            Sketchup.write_default('AluDoorCloud', 'user_pwd', saved_pwd)
+            Sketchup.write_default('AluDoorCloud', 'user_tokens', tokens)
+            UI.messagebox("✅ Supabase Login Successful!\n\nFabricator: #{email}\nActive Quota: #{tokens} Bar Tokens (6000mm)")
+          else
+            # Try automatic signup for new fabricators with 100 free tokens
+            puts "=> [ALU DOOR Cloud] Account not found, registering new fabricator..."
+            signup_res = AluDoorPilot::SupabaseAuth.sign_up(email, saved_pwd)
+            if signup_res[:success]
+              tokens = 100
+              Sketchup.write_default('AluDoorCloud', 'user_email', email)
+              Sketchup.write_default('AluDoorCloud', 'user_pwd', saved_pwd)
+              Sketchup.write_default('AluDoorCloud', 'user_tokens', tokens)
+              UI.messagebox("🎉 Welcome to ALU DOOR 70S Pro!\n\nNew Account Created: #{email}\n100 Free 6.0m Bar Tokens Credited.")
+            else
+              UI.messagebox("❌ Login Failed: #{res[:error] || 'Invalid credentials'}\nProceeding in Guest Mode.")
+              email = "guest@aludoor.com"
+              tokens = 100
+            end
+          end
+        else
+          email = "guest@aludoor.com"
+          tokens = 100
+        end
+      else
+        tokens = Sketchup.read_default('AluDoorCloud', 'user_tokens', 100)
+      end
+
+      # 2. Launch Main Interactive Workshop Dialog
       dialog = UI::HtmlDialog.new({
-        :dialog_title => "ALU DOOR 70S Pro — Multi-Opening Project Manager & Vendor POs",
-        :preferences_key => "com.aludoor.workshop_report_v4",
+        :dialog_title => "ALU DOOR 70S Pro — Multi-Opening Project Manager & Vendor POs (#{email})",
+        :preferences_key => "com.aludoor.workshop_report_v5",
         :width => 1260,
         :height => 900,
         :min_width => 920,
@@ -83,9 +131,8 @@ module AluDoorPilot
       dialog.add_action_callback("saveToCloud") do |_action_context, json_str|
         begin
           payload = JSON.parse(json_str)
-          saved_email = Sketchup.read_default('AluDoorCloud', 'user_email', 'fabricator@aludoor.com')
           AluDoorPilot::SupabaseAuth.save_door_to_cloud(
-            payload['name'] || "ALU Door Project (#{saved_email})",
+            payload['name'] || "ALU Door Project (#{email})",
             1500.0, 2100.0,
             payload,
             {}
@@ -102,10 +149,11 @@ module AluDoorPilot
           creds = JSON.parse(json_str)
           res = AluDoorPilot::SupabaseAuth.sign_in(creds['email'], creds['password'])
           if res[:success]
-            tokens = res.dig(:user, 'user_metadata', 'tokens') || 100
+            u_tokens = res.dig(:user, 'user_metadata', 'tokens') || 100
             Sketchup.write_default('AluDoorCloud', 'user_email', creds['email'])
-            Sketchup.write_default('AluDoorCloud', 'user_tokens', tokens)
-            dialog.execute_script("onAuthSuccess(#{creds['email'].to_json}, #{tokens});")
+            Sketchup.write_default('AluDoorCloud', 'user_pwd', creds['password'])
+            Sketchup.write_default('AluDoorCloud', 'user_tokens', u_tokens)
+            dialog.execute_script("onAuthSuccess(#{creds['email'].to_json}, #{u_tokens});")
           else
             dialog.execute_script("onAuthError(#{res[:error].to_json});")
           end
@@ -117,6 +165,7 @@ module AluDoorPilot
       # Action Callback 4: Native Supabase Logout
       dialog.add_action_callback("authLogout") do |_action_context|
         Sketchup.write_default('AluDoorCloud', 'user_email', '')
+        Sketchup.write_default('AluDoorCloud', 'user_pwd', '')
         Sketchup.write_default('AluDoorCloud', 'user_tokens', 0)
         dialog.execute_script("onAuthLoggedOut();")
       end
@@ -126,17 +175,20 @@ module AluDoorPilot
       dialog.set_html(html_content)
       dialog.show
 
-      # Pass saved credentials if any
-      saved_email = Sketchup.read_default('AluDoorCloud', 'user_email', 'asankasampath@gmail.com')
-      saved_tokens = Sketchup.read_default('AluDoorCloud', 'user_tokens', 100)
-      if saved_email && !saved_email.empty?
-        UI.start_timer(0.5, false) do
-          dialog.execute_script("if(window.setInitialAuthState) window.setInitialAuthState(#{saved_email.to_json}, #{saved_tokens});")
-        end
+      # Pass authenticated state
+      UI.start_timer(0.4, false) do
+        dialog.execute_script("if(window.setInitialAuthState) window.setInitialAuthState(#{email.to_json}, #{tokens});")
       end
 
-      puts "=> [Project Manager] ALU DOOR 70S Pro launched with Live Supabase Auth (#{saved_email})."
+      puts "=> [Project Manager] ALU DOOR 70S Pro active with Supabase Auth (#{email}, #{tokens} Tokens)."
       dialog
+    end
+
+    def logout
+      Sketchup.write_default('AluDoorCloud', 'user_email', '')
+      Sketchup.write_default('AluDoorCloud', 'user_pwd', '')
+      Sketchup.write_default('AluDoorCloud', 'user_tokens', 0)
+      UI.messagebox("✅ Successfully signed out of ALU DOOR Cloud.\nNext launch will prompt for login.")
     end
 
     def show_interactive
