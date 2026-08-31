@@ -111,10 +111,9 @@ module.exports = async (req, res) => {
 
         // Strip disk-loading statements since all modules are loaded directly into RAM
         code = code.replace(/require_relative\s+['"].*?['"]/g, '# [RAM Stripped require_relative]');
-        code = code.replace(/load\s+File\.join\(__dir__.*?\)/g, '# [RAM Stripped load]');
+        code = code.replace(/load\s+File\.join\(.*?\)/g, '# [RAM Stripped load]');
         code = code.replace(/HTML_FILE\s*=\s*File\.expand_path\(.*?\)/g, 'HTML_FILE = ""');
         code = code.replace(/html_content\s*=\s*File\.read\(HTML_FILE.*?\)/g, 'html_content = ALU_DOOR_EMBEDDED_HTML');
-        code = code.replace(/File\.expand_path\(File\.join\(__dir__.*?\)\)/g, '""');
 
         bundledCode += `\n# --- BEGIN: ${file} ---\n` + code + `\n# --- END: ${file} ---\n`;
       }

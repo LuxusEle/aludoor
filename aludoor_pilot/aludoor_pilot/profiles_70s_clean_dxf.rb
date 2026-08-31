@@ -687,7 +687,6 @@ module AluDoorPilot
     # 4. ST Assembly Fastener Screws passing through side jambs into C-grooves
     # =========================================================================
     def build_outer_wall_frame(entities = nil, height_mm = 2100.0, width_mm = 1000.0)
-      load File.join(__dir__, 'hardware_70s.rb') if File.exist?(File.join(__dir__, 'hardware_70s.rb'))
 
       model = Sketchup.active_model
       ents = entities || model.active_entities

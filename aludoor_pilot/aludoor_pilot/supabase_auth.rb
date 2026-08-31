@@ -23,21 +23,23 @@ module AluDoorPilot
     def load_config
       return @config unless @config.empty?
 
-      env_candidates = [
-        File.expand_path(File.join(__dir__, '..', '..', '.env')),
-        File.expand_path(File.join(__dir__, '..', '.env')),
-        File.expand_path(File.join(__dir__, '.env'))
-      ]
+      if defined?(__dir__) && __dir__
+        env_candidates = [
+          File.expand_path(File.join(__dir__, '..', '..', '.env')),
+          File.expand_path(File.join(__dir__, '..', '.env')),
+          File.expand_path(File.join(__dir__, '.env'))
+        ]
 
-      env_candidates.each do |env_path|
-        if File.exist?(env_path)
-          File.readlines(env_path).each do |line|
-            line = line.strip
-            next if line.empty? || line.start_with?('#') || !line.include?('=')
-            k, v = line.split('=', 2)
-            @config[k.strip] = v.strip.gsub(/^["']|["']$/, '')
+        env_candidates.each do |env_path|
+          if File.exist?(env_path)
+            File.readlines(env_path).each do |line|
+              line = line.strip
+              next if line.empty? || line.start_with?('#') || !line.include?('=')
+              k, v = line.split('=', 2)
+              @config[k.strip] = v.strip.gsub(/^["']|["']$/, '')
+            end
+            break unless @config.empty?
           end
-          break unless @config.empty?
         end
       end
 

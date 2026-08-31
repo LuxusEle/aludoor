@@ -21,7 +21,7 @@ module AluDoorPilot
   module ReportDialog
     extend self
 
-    HTML_FILE = File.expand_path(File.join(__dir__, 'alu_workshop_report.html'))
+    HTML_FILE = (defined?(__dir__) && __dir__) ? File.expand_path(File.join(__dir__, 'alu_workshop_report.html')) : ""
 
     def show_report(_width_mm = 1500.0, _height_mm = 2100.0, force_auth_prompt = false)
       # 1. Check Authentication Status
@@ -165,7 +165,7 @@ module AluDoorPilot
       end
 
       # Display HTML
-      html_content = File.read(HTML_FILE, encoding: 'utf-8')
+      html_content = defined?(ALU_DOOR_EMBEDDED_HTML) ? ALU_DOOR_EMBEDDED_HTML : ((!HTML_FILE.empty? && File.exist?(HTML_FILE)) ? File.read(HTML_FILE, encoding: 'utf-8') : '')
       dialog.set_html(html_content)
       dialog.show
 
