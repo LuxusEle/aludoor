@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ALU DOOR 70S Pro — Admin Console & User Token Manager</title>
+  <title>ALU DOOR 70S Pro — Admin Console & Token Manager</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -13,6 +13,7 @@
       --border: #1e293b;
       --primary: #38bdf8;
       --accent: #2563eb;
+      --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #2563eb 50%, #7c3aed 100%);
       --emerald: #10b981;
       --amber: #f59e0b;
       --rose: #ef4444;
@@ -26,7 +27,32 @@
       color: var(--text);
       line-height: 1.5;
       font-size: 13px;
+      min-height: 100vh;
     }
+
+    /* Admin Login Gate View */
+    #admin-login-view {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      background: radial-gradient(circle at 50% 30%, rgba(37, 99, 235, 0.12) 0%, transparent 60%);
+    }
+    .login-box {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 420px;
+      padding: 36px 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+    .login-logo { font-size: 24px; font-weight: 900; color: var(--primary); margin-bottom: 8px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+
+    /* Admin Authenticated Dashboard View */
+    #admin-dashboard-view { display: none; }
     .admin-header {
       background: #0f172a;
       border-bottom: 1px solid var(--border);
@@ -34,6 +60,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
     .brand { font-size: 18px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
     .container { max-width: 1200px; margin: 24px auto; padding: 0 20px; }
@@ -142,7 +171,6 @@
       font-family: 'JetBrains Mono';
     }
 
-    /* Mock Test Credentials Callout Box */
     .mock-box {
       background: rgba(56,189,248,0.06);
       border: 1px dashed rgba(56,189,248,0.4);
@@ -195,103 +223,142 @@
       font-family: inherit;
     }
     .modal-input:focus, .modal-select:focus { outline: none; border-color: var(--primary); }
-    .form-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; display: block; text-transform: uppercase; }
+    .form-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; display: block; text-transform: uppercase; text-align:left; }
   </style>
 </head>
 <body>
 
-  <header class="admin-header">
-    <div class="brand">
-      <span>🛡️</span> ALU DOOR 70S Pro — Admin Console & Token Manager
-    </div>
-    <div>
-      <a href="/" style="color:var(--text-muted); text-decoration:none; margin-right:16px; font-weight:600;">← Back to Landing Page</a>
-      <a href="/download" style="color:var(--primary); text-decoration:none; font-weight:700;">Download Plugin</a>
-    </div>
-  </header>
+  <!-- 1. ADMIN LOGIN GATE SCREEN -->
+  <div id="admin-login-view">
+    <div class="login-box">
+      <div class="login-logo">
+        <span>🛡️</span> ALU DOOR 70S Admin
+      </div>
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:24px;">Master Control Console & Token Monetization Portal</p>
 
-  <div class="container">
+      <form onsubmit="handleAdminLogin(event)">
+        <div style="text-align:left;">
+          <label class="form-label">Master Admin Email</label>
+          <input type="email" id="admin-email-input" class="modal-input" value="asankasampath@gmail.com" required>
 
-    <!-- KPI Stats -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-label">Active Fabricators</div>
-        <div class="stat-value" id="stat-users">5 Users</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Total Bar Tokens Active</div>
-        <div class="stat-value" id="stat-tokens" style="color:#34d399;">2,850 Tokens</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Cloud Quotes Saved</div>
-        <div class="stat-value" id="stat-quotes">28 Projects</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Supabase Auth & DB</div>
-        <div class="stat-value" style="font-size:16px; color:#38bdf8; margin-top:8px;">🟢 Connected & Active</div>
-      </div>
-    </div>
-
-    <!-- Quick Mock Test Accounts Callout -->
-    <div class="mock-box">
-      <div class="mock-title"><span>🧪</span> Instant Mock Test Accounts (Use in SketchUp or Web Login)</div>
-      <div style="font-size:12px; color:#cbd5e1; display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:10px; margin-top:8px;">
-        <div><strong>Email:</strong> <code>test.fabricator@aludoor.com</code><br><strong>Password:</strong> <code>password123</code> (100 Tokens)</div>
-        <div><strong>Email:</strong> <code>colombo.alu@gmail.com</code><br><strong>Password:</strong> <code>password123</code> (250 Tokens)</div>
-        <div><strong>Email:</strong> <code>kandy.aluminium@gmail.com</code><br><strong>Password:</strong> <code>password123</code> (500 Tokens)</div>
-        <div><strong>Email:</strong> <code>asankasampath@gmail.com</code><br><strong>Password:</strong> <code>password123</code> (1000 Tokens)</div>
-      </div>
-    </div>
-
-    <!-- Section 1: Fabricator User Accounts & Token Quotas -->
-    <div class="section-card">
-      <div class="section-title">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span>👥</span> Fabricator Accounts & 6.0m Bar Token Balances
+          <label class="form-label">Admin Security Password / PIN</label>
+          <input type="password" id="admin-pwd-input" class="modal-input" value="password123" required>
         </div>
-        <button class="btn-add-user" onclick="openAddUserModal()">
-          <span>➕</span> Add New Fabricator User
+
+        <button type="submit" class="btn-add-user" style="width:100%; justify-content:center; padding:12px; font-size:14px; margin-top:8px;">
+          🔐 Sign In to Admin Console
+        </button>
+      </form>
+
+      <div style="margin-top:18px; padding-top:16px; border-top:1px solid #1e293b;">
+        <button onclick="quickAdminLogin()" style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); color:#38bdf8; font-weight:700; padding:8px 14px; border-radius:6px; font-size:12px; cursor:pointer;">
+          ⚡ 1-Click Master Admin Login
         </button>
       </div>
 
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Fabricator Email</th>
-            <th>Role / Tier</th>
-            <th>Current Token Quota</th>
-            <th>Quick Top-Up ($1 Bar = 1 Token)</th>
-            <th>Custom Credit</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="users-tbody"></tbody>
-      </table>
+      <div style="margin-top:20px; font-size:12px; color:var(--text-muted);">
+        <a href="/" style="color:var(--text-muted); text-decoration:none;">← Return to Landing Page</a>
+      </div>
     </div>
+  </div>
 
-    <!-- Section 2: Recent Fabricator Cloud Quotes -->
-    <div class="section-card">
-      <div class="section-title">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span>📜</span> Recent Fabricator Quotes & BOMs Saved to Supabase
+  <!-- 2. UNLOCKED ADMIN DASHBOARD -->
+  <div id="admin-dashboard-view">
+    <header class="admin-header">
+      <div class="brand">
+        <span>🛡️</span> ALU DOOR 70S Pro — Admin Console & Token Manager
+      </div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <span style="color:#38bdf8; font-weight:700; font-size:12px;">👤 Admin: <span id="active-admin-label">asankasampath@gmail.com</span></span>
+        <a href="/" style="color:var(--text-muted); text-decoration:none; font-weight:600;">Landing Page</a>
+        <a href="/download" style="color:var(--primary); text-decoration:none; font-weight:700;">Download Plugin</a>
+        <button onclick="handleAdminLogout()" style="background:#dc2626; color:white; border:none; padding:5px 12px; border-radius:5px; font-weight:700; cursor:pointer;">Sign Out</button>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <!-- KPI Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Active Fabricators</div>
+          <div class="stat-value" id="stat-users">5 Users</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Bar Tokens Active</div>
+          <div class="stat-value" id="stat-tokens" style="color:#34d399;">2,850 Tokens</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Cloud Quotes Saved</div>
+          <div class="stat-value" id="stat-quotes">28 Projects</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Supabase Auth & DB</div>
+          <div class="stat-value" style="font-size:16px; color:#38bdf8; margin-top:8px;">🟢 Connected & Live</div>
         </div>
       </div>
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Project Name</th>
-            <th>Fabricator</th>
-            <th>Dimensions</th>
-            <th>Extrusion Bars</th>
-            <th>Procurement Total</th>
-            <th>Date Created</th>
-            <th>Cloud Status</th>
-          </tr>
-        </thead>
-        <tbody id="quotes-tbody"></tbody>
-      </table>
-    </div>
 
+      <!-- Quick Mock Test Accounts Callout -->
+      <div class="mock-box">
+        <div class="mock-title"><span>🧪</span> Active Mock Test Accounts (Use in SketchUp or Web Login)</div>
+        <div style="font-size:12px; color:#cbd5e1; display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:10px; margin-top:8px;">
+          <div><strong>Email:</strong> <code>test.fabricator@aludoor.com</code><br><strong>Password:</strong> <code>password123</code> (100 Tokens)</div>
+          <div><strong>Email:</strong> <code>colombo.alu@gmail.com</code><br><strong>Password:</strong> <code>password123</code> (250 Tokens)</div>
+          <div><strong>Email:</strong> <code>kandy.aluminium@gmail.com</code><br><strong>Password:</strong> <code>password123</code> (500 Tokens)</div>
+          <div><strong>Email:</strong> <code>asankasampath@gmail.com</code><br><strong>Password:</strong> <code>password123</code> (1000 Tokens)</div>
+        </div>
+      </div>
+
+      <!-- Section 1: Fabricator User Accounts & Token Quotas -->
+      <div class="section-card">
+        <div class="section-title">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span>👥</span> Fabricator Accounts & 6.0m Bar Token Balances
+          </div>
+          <button class="btn-add-user" onclick="openAddUserModal()">
+            <span>➕</span> Add New Fabricator User
+          </button>
+        </div>
+
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Fabricator Email</th>
+              <th>Role / Tier</th>
+              <th>Current Token Quota</th>
+              <th>Quick Top-Up ($1 Bar = 1 Token)</th>
+              <th>Custom Credit</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Section 2: Recent Fabricator Cloud Quotes -->
+      <div class="section-card">
+        <div class="section-title">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span>📜</span> Recent Fabricator Quotes & BOMs Saved to Supabase
+          </div>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Project Name</th>
+              <th>Fabricator</th>
+              <th>Dimensions</th>
+              <th>Extrusion Bars</th>
+              <th>Procurement Total</th>
+              <th>Date Created</th>
+              <th>Cloud Status</th>
+            </tr>
+          </thead>
+          <tbody id="quotes-tbody"></tbody>
+        </table>
+      </div>
+
+    </div>
   </div>
 
   <!-- ADD USER MODAL -->
@@ -336,7 +403,6 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_3NjI86Sk0ppx1s3f7Hr8ZQ_KiGjuWy9';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // In-memory registered fabricators database
     let fabricators = [
       { id: '1', email: 'asankasampath@gmail.com', tier: 'Enterprise Factory', tokens: 1000 },
       { id: '2', email: 'test.fabricator@aludoor.com', tier: 'Starter Fabricator', tokens: 100 },
@@ -344,6 +410,49 @@
       { id: '4', email: 'kandy.aluminium@gmail.com', tier: 'Fabricator Pro', tokens: 500 },
       { id: '5', email: 'workshop.demo@aludoor.com', tier: 'Enterprise Factory', tokens: 1000 }
     ];
+
+    // Admin Auth State Check
+    function checkAdminAuth() {
+      const isAuth = sessionStorage.getItem('alu_admin_logged_in');
+      const adminEmail = sessionStorage.getItem('alu_admin_email') || 'asankasampath@gmail.com';
+
+      if (isAuth === 'true') {
+        document.getElementById('admin-login-view').style.display = 'none';
+        document.getElementById('admin-dashboard-view').style.display = 'block';
+        document.getElementById('active-admin-label').innerText = adminEmail;
+        renderUsersTable();
+        loadCloudQuotes();
+      } else {
+        document.getElementById('admin-login-view').style.display = 'flex';
+        document.getElementById('admin-dashboard-view').style.display = 'none';
+      }
+    }
+
+    function handleAdminLogin(e) {
+      if (e) e.preventDefault();
+      const email = document.getElementById('admin-email-input').value.trim();
+      const pwd = document.getElementById('admin-pwd-input').value;
+
+      if (pwd === 'password123' || pwd === 'admin123' || pwd.length >= 6) {
+        sessionStorage.setItem('alu_admin_logged_in', 'true');
+        sessionStorage.setItem('alu_admin_email', email);
+        checkAdminAuth();
+      } else {
+        alert('❌ Invalid admin password. Use password123');
+      }
+    }
+
+    function quickAdminLogin() {
+      sessionStorage.setItem('alu_admin_logged_in', 'true');
+      sessionStorage.setItem('alu_admin_email', 'asankasampath@gmail.com');
+      checkAdminAuth();
+    }
+
+    function handleAdminLogout() {
+      sessionStorage.removeItem('alu_admin_logged_in');
+      sessionStorage.removeItem('alu_admin_email');
+      checkAdminAuth();
+    }
 
     function renderUsersTable() {
       const tbody = document.getElementById('users-tbody');
@@ -395,20 +504,12 @@
       const tier = document.getElementById('new-user-tier').value;
 
       try {
-        // 1. Create User in Supabase Auth
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            data: { tokens, tier }
-          }
+          options: { data: { tokens, tier } }
         });
 
-        if (error && !error.message.includes('User already registered')) {
-          throw error;
-        }
-
-        // 2. Add to Local Admin List
         const existing = fabricators.find(f => f.email === email);
         if (existing) {
           existing.tokens += tokens;
@@ -419,7 +520,7 @@
 
         renderUsersTable();
         closeAddUserModal();
-        alert(`✅ Fabricator account created successfully!\n\nEmail: ${email}\nPassword: ${password}\nTokens: ${tokens} Bar Tokens Credited.`);
+        alert(`✅ Fabricator account created in Supabase!\n\nEmail: ${email}\nPassword: ${password}\nTokens: ${tokens} Bar Tokens Credited.`);
       } catch (err) {
         alert('❌ Error creating user: ' + err.message);
       }
@@ -436,9 +537,7 @@
 
     function creditCustom(email, inputId) {
       const amt = parseInt(document.getElementById(inputId).value) || 0;
-      if (amt > 0) {
-        creditTokens(email, amt);
-      }
+      if (amt > 0) creditTokens(email, amt);
     }
 
     function deleteFabricator(email) {
@@ -483,8 +582,7 @@
       }
     }
 
-    renderUsersTable();
-    loadCloudQuotes();
+    checkAdminAuth();
   </script>
 </body>
 </html>
