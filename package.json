@@ -1,0 +1,14 @@
+{
+  "name": "alu-door-70s-cloud",
+  "version": "1.0.0",
+  "description": "ALU DOOR 70S Pro — RAM Streaming Cloud Engine, Admin Panel & Fabricator Portal",
+  "main": "api/load-engine.js",
+  "scripts": {
+    "start": "npx serve public",
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.8",
+    "dotenv": "^16.4.5"
+  }
+}

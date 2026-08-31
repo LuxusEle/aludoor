@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ALU DOOR 70S Pro — Cloud RAM-Streaming Aluminium Engineering Platform</title>
+  <meta name="description" content="AI-Powered 70S Sliding Door & Window Engineering Platform. 1D Bar Nesting, Blueprint X-Ray CAD, Per-Bar Sri Lanka Pricing, and RAM-Streaming for SketchUp Pro.">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #030712;
+      --card-bg: rgba(15, 23, 42, 0.75);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.35);
+      --accent: #2563eb;
+      --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #2563eb 50%, #7c3aed 100%);
+      --emerald: #10b981;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(124, 58, 237, 0.08) 0%, transparent 40%);
+    }
+
+    /* Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(16px);
+      background: rgba(3, 7, 18, 0.85);
+      border-bottom: 1px solid var(--card-border);
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 22px;
+      font-weight: 900;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-link { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 14px; transition: color 0.2s; }
+    .nav-link:hover { color: var(--primary); }
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { background: rgba(255, 255, 255, 0.15); }
+    .nav-btn-primary {
+      background: var(--accent-gradient);
+      border: none;
+      box-shadow: 0 4px 20px var(--primary-glow);
+    }
+    .nav-btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
+
+    /* Hero Section */
+    .hero {
+      max-width: 1200px;
+      margin: 60px auto 40px;
+      padding: 0 24px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 20px;
+    }
+    .hero-title {
+      font-size: 54px;
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      letter-spacing: -1px;
+    }
+    .hero-title span {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-desc {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 760px;
+      margin: 0 auto 36px;
+      font-weight: 400;
+    }
+    .hero-actions { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+    .btn-hero {
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    /* Feature Grid */
+    .features-section {
+      max-width: 1200px;
+      margin: 60px auto;
+      padding: 0 24px;
+    }
+    .section-headline { text-align: center; margin-bottom: 40px; }
+    .section-headline h2 { font-size: 34px; font-weight: 900; margin-bottom: 8px; }
+    .section-headline p { color: var(--text-muted); font-size: 16px; }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 26px;
+      backdrop-filter: blur(12px);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 22px;
+      margin-bottom: 18px;
+    }
+    .feature-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: #fff; }
+    .feature-card p { font-size: 13.5px; color: var(--text-muted); line-height: 1.5; }
+
+    /* 3-Tier Token Pricing Section */
+    .pricing-section {
+      max-width: 1200px;
+      margin: 80px auto;
+      padding: 0 24px;
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      align-items: stretch;
+    }
+    .pricing-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 36px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      backdrop-filter: blur(12px);
+      transition: all 0.2s;
+    }
+    .pricing-card.popular {
+      border-color: #38bdf8;
+      box-shadow: 0 0 40px rgba(56, 189, 248, 0.2);
+      transform: scale(1.03);
+    }
+    .popular-tag {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent-gradient);
+      color: white;
+      padding: 4px 14px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .plan-name { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .plan-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    .plan-price { font-size: 38px; font-weight: 900; margin-bottom: 6px; font-family: 'JetBrains Mono'; }
+    .plan-price span { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+    .token-pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-weight: 700;
+      font-size: 12px;
+      margin-bottom: 24px;
+      font-family: 'JetBrains Mono';
+    }
+    .plan-features { list-style: none; margin-bottom: 30px; }
+    .plan-features li {
+      font-size: 13.5px;
+      color: #cbd5e1;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .plan-features li::before {
+      content: "✓";
+      color: var(--primary);
+      font-weight: 900;
+    }
+    .btn-plan {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-card {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 420px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .modal-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: white;
+      font-size: 14px;
+      margin-bottom: 14px;
+      font-family: inherit;
+    }
+    .modal-input:focus { outline: none; border-color: var(--primary); }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--card-border);
+      padding: 40px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="logo">
+      <span>📐</span> ALU DOOR 70S Pro
+    </div>
+    <div class="nav-links">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#pricing" class="nav-link">Pricing (Tokens)</a>
+      <a href="/download" class="nav-link">Plugin Download</a>
+      <a href="/admin" class="nav-link">Admin Panel</a>
+      <button class="nav-btn" id="btn-nav-auth" onclick="openAuthModal('signin')">Fabricator Sign In</button>
+      <a href="/download" class="nav-btn nav-btn-primary">⚡ Download 8KB Loader</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span>🚀</span> RAM-Streaming Cloud Architecture for SketchUp Pro
+    </div>
+    <h1 class="hero-title">
+      70S Aluminium Sliding Door & Window<br>
+      <span>Workshop Production & PO Engine</span>
+    </h1>
+    <p class="hero-desc">
+      Automate cutting stock with 1D linear bar nesting, X-Ray blueprint CAD stencils, Sri Lanka per-bar pricing (Alumex/Amex), and multi-opening schedules streamed directly into SketchUp's RAM.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-hero nav-btn-primary" onclick="openAuthModal('signup')">
+        <span>🔑</span> Get 100 Free Bar Tokens
+      </button>
+      <a href="/download" class="btn-hero nav-btn">
+        <span>📥</span> Download SketchUp Loader (8 KB)
+      </a>
+      <a href="/admin" class="btn-hero nav-btn" style="border-color:#7c3aed; color:#c084fc;">
+        <span>🛡️</span> Admin & Vendor Portal
+      </a>
+    </div>
+  </section>
+
+  <!-- Feature Grid -->
+  <section class="features-section" id="features">
+    <div class="section-headline">
+      <h2>Engineering Precision for Workshop Floor Fabricators</h2>
+      <p>Built specifically for the Sri Lankan aluminium fabrication market</p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📐</div>
+        <h3>1D Linear Cutting Stock Optimizer</h3>
+        <p>Best-Fit Decreasing engine nests cuts into standard 6.0m stock bars with 3.5mm blade kerf accounting and reusable offcut tracking.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔬</div>
+        <h3>2D CAD & Blueprint X-Ray View</h3>
+        <p>Architectural black-and-white drawings with middle shortening marks (≈) revealing concealed rollers, corner screw ports, and interlock hooks.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏢</div>
+        <h3>Multi-Opening Project Manager</h3>
+        <p>Add custom door/window schedule lists with line quantities and unit numbers (#01..#09) to nest global cuts across 6000mm bars.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📜</div>
+        <h3>Sri Lanka Per-Bar PO Sheets</h3>
+        <p>Calculate exact procurement costs per 6m stock bar (LKR) with vendor price memory catalogs for Alumex, Amex, Swisstek, Glass, and Hardware.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3-Tier Token Pricing Section ($1 Bar = 1 Token) -->
+  <section class="pricing-section" id="pricing">
+    <div class="section-headline">
+      <h2>Transparent Token-Based Bar Pricing</h2>
+      <p>1 Token = 1 Stock Extrusion Bar (6000 mm) Calculated & Optimized</p>
+    </div>
+
+    <div class="pricing-grid">
+      
+      <!-- Tier 1: Starter -->
+      <div class="pricing-card">
+        <div>
+          <div class="plan-name">🥉 Starter Fabricator</div>
+          <div class="plan-desc">For small aluminium workshop teams & custom homes</div>
+          <div class="plan-price">Rs. 2,500 <span>/ month</span></div>
+          <div class="token-pill">50 Bar Tokens (~Rs. 50 / Bar)</div>
+          <ul class="plan-features">
+            <li>70S 2-Track Full System</li>
+            <li>1D Linear Bar Nesting Engine</li>
+            <li>Itemized Cut Piece BOM</li>
+            <li>1-Click Direct PDF Exporter</li>
+            <li>Local Price Memory</li>
+          </ul>
+        </div>
+        <button class="btn-plan nav-btn" onclick="openAuthModal('signup', 'starter')">Select Starter Plan</button>
+      </div>
+
+      <!-- Tier 2: Fabricator Pro (Most Popular) -->
+      <div class="pricing-card popular">
+        <div class="popular-tag">Most Popular</div>
+        <div>
+          <div class="plan-name">🥈 Fabricator Pro</div>
+          <div class="plan-desc">For active window & door fabrication businesses</div>
+          <div class="plan-price">Rs. 10,000 <span>/ month</span></div>
+          <div class="token-pill">250 Bar Tokens (~Rs. 40 / Bar)</div>
+          <ul class="plan-features">
+            <li>Everything in Starter</li>
+            <li>Multi-Opening Schedule Manager</li>
+            <li>2D CAD & Blueprint X-Ray Gallery</li>
+            <li>Vendor Purchase Orders (Alu, HW, Glass)</li>
+            <li>Supabase Cloud Database Sync</li>
+            <li>RAM Streaming for SketchUp Pro</li>
+          </ul>
+        </div>
+        <button class="btn-plan nav-btn-primary" onclick="openAuthModal('signup', 'pro')">Get Fabricator Pro</button>
+      </div>
+
+      <!-- Tier 3: Enterprise & Factory -->
+      <div class="pricing-card">
+        <div>
+          <div class="plan-name">🥇 Enterprise Factory</div>
+          <div class="plan-desc">For large extrusion fabricators & commercial contracts</div>
+          <div class="plan-price">Rs. 35,000 <span>/ month</span></div>
+          <div class="token-pill">1,000 Bar Tokens (~Rs. 35 / Bar)</div>
+          <ul class="plan-features">
+            <li>Everything in Fabricator Pro</li>
+            <li>Unlimited Multi-Opening Schedules</li>
+            <li>Multi-Seat Workshop Floor Access</li>
+            <li>Custom Supplier Database Integration</li>
+            <li>Direct Technical Support & Onboarding</li>
+            <li>Dedicated Cloud Serverless Instance</li>
+          </ul>
+        </div>
+        <button class="btn-plan nav-btn" onclick="openAuthModal('signup', 'enterprise')">Contact Enterprise</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Auth Modal -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeAuthModal()">✕</button>
+      <h2 id="modal-title" style="font-size:22px; font-weight:800; margin-bottom:6px;">Fabricator Sign In</h2>
+      <p id="modal-subtitle" style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Access your 70S cloud engine and bar tokens</p>
+      
+      <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+        <input type="email" id="auth-email" class="modal-input" placeholder="Fabricator Email (e.g. workshop@gmail.com)" required>
+        <input type="password" id="auth-password" class="modal-input" placeholder="Password (Min 6 characters)" required>
+        <button type="submit" id="btn-modal-submit" class="btn-plan nav-btn-primary" style="margin-top:10px;">Sign In & Stream to RAM</button>
+      </form>
+
+      <div style="margin-top:16px; text-align:center; font-size:12px; color:var(--text-muted);">
+        <span id="auth-toggle-msg">Don't have an account?</span>
+        <a href="javascript:void(0)" id="auth-toggle-link" onclick="toggleAuthMode()" style="color:var(--primary); font-weight:700; margin-left:4px;">Register (100 Free Tokens)</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2026 ALU DOOR 70S Pro — Sri Lanka Aluminium Engineering Platform. Connected to Supabase & Vercel Cloud.</p>
+  </footer>
+
+  <script>
+    const SUPABASE_URL = 'https://iefeibuhjupnpmcomxbg.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_3NjI86Sk0ppx1s3f7Hr8ZQ_KiGjuWy9';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let authMode = 'signin';
+
+    function openAuthModal(mode = 'signin', plan = null) {
+      authMode = mode;
+      document.getElementById('auth-modal').style.display = 'flex';
+      updateModalUI();
+    }
+
+    function closeAuthModal() {
+      document.getElementById('auth-modal').style.display = 'none';
+    }
+
+    function toggleAuthMode() {
+      authMode = authMode === 'signin' ? 'signup' : 'signin';
+      updateModalUI();
+    }
+
+    function updateModalUI() {
+      if (authMode === 'signup') {
+        document.getElementById('modal-title').innerText = 'Create Fabricator Account';
+        document.getElementById('modal-subtitle').innerText = 'Get 100 Free 6.0m Bar Tokens instantly for your workshop';
+        document.getElementById('btn-modal-submit').innerText = 'Register & Claim 100 Tokens';
+        document.getElementById('auth-toggle-msg').innerText = 'Already have an account?';
+        document.getElementById('auth-toggle-link').innerText = 'Sign In';
+      } else {
+        document.getElementById('modal-title').innerText = 'Fabricator Sign In';
+        document.getElementById('modal-subtitle').innerText = 'Authenticate to stream 70S Engine into SketchUp';
+        document.getElementById('btn-modal-submit').innerText = 'Sign In & Stream Engine';
+        document.getElementById('auth-toggle-msg').innerText = "Don't have an account?";
+        document.getElementById('auth-toggle-link').innerText = 'Register (100 Free Tokens)';
+      }
+    }
+
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+
+      try {
+        if (authMode === 'signup') {
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { tokens: 100 } }
+          });
+          if (error) throw error;
+          alert('✅ Registration successful! 100 Bar Tokens credited to your account.');
+          closeAuthModal();
+          window.location.href = '/download';
+        } else {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          alert('✅ Welcome back! Authenticated with ' + (data.user.user_metadata?.tokens || 100) + ' Bar Tokens.');
+          closeAuthModal();
+          window.location.href = '/download';
+        }
+      } catch (err) {
+        alert('Authentication Error: ' + err.message);
+      }
+    }
+
+    // Check logged in state on load
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        document.getElementById('btn-nav-auth').innerText = `${session.user.email.split('@')[0]} (${session.user.user_metadata?.tokens || 100} Tokens)`;
+      }
+    });
+  </script>
+</body>
+</html>

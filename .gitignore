@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+.npm/
+
+# Environment Variables
+.env*.local
+
+# Vercel
+.vercel/
+
+# Temporary files
+tmp/
+output/
+scratch/
+*.mp4
+
+# OS Files
+.DS_Store
+Thumbs.db
