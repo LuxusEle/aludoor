@@ -53,44 +53,44 @@ module AluDoorCloudLoader
       password: saved_pwd
     })
 
+    response = nil
     begin
       response = http.request(request)
-      if response.code.to_i == 200
-        res_data = JSON.parse(response.body)
-        if res_data['success'] && res_data['code']
-          tokens_left = res_data['user']['tokens_remaining'] || 100
-          puts "=> [ALU DOOR Cloud] Authentication successful! Tokens: #{tokens_left} 6m Bars remaining."
-          
-          # Stream directly to RAM
-          eval(res_data['code'], TOPLEVEL_BINDING)
-        else
-          UI.messagebox("❌ Cloud Error: #{res_data['error'] || 'Unknown error'}")
-        end
-      else
-        begin
-          err_body = JSON.parse(response.body)
-          msg = err_body['error'] || "Server returned HTTP #{response.code}"
-        rescue
-          msg = "Server returned HTTP #{response.code}"
-        end
+    rescue StandardError => net_err
+      UI.messagebox("❌ Network Error: Could not connect to #{endpoint}\n#{net_err.message}")
+      return
+    end
 
-        if response.code.to_i == 401
-          # Reset saved password so user can re-enter
-          Sketchup.write_default('AluDoorCloud', 'user_pwd', '')
-          UI.messagebox("❌ Login Failed: #{msg}\nPlease launch again to re-enter credentials.")
-        else
-          UI.messagebox("❌ Cloud Stream Failed: #{msg}")
+    if response.code.to_i == 200
+      res_data = JSON.parse(response.body)
+      if res_data['success'] && res_data['code']
+        tokens_left = res_data['user']['tokens_remaining'] || 100
+        puts "=> [ALU DOOR Cloud] Authentication successful! Tokens: #{tokens_left} 6m Bars remaining."
+        
+        # Stream directly to RAM
+        begin
+          eval(res_data['code'], TOPLEVEL_BINDING)
+        rescue StandardError => eval_err
+          puts "=> [ALU DOOR Cloud] Runtime eval error: #{eval_err.message}"
+          puts eval_err.backtrace.join("\n")
+          UI.messagebox("❌ RAM Engine Execution Error:\n#{eval_err.message}")
         end
-      end
-    rescue StandardError => err
-      # Fallback to local pilot if offline/local development
-      local_pilot_main = File.expand_path(File.join(__dir__, '..', 'aludoor_pilot', 'aludoor_pilot', 'main.rb'))
-      if File.existsSync?(local_pilot_main)
-        puts "=> [ALU DOOR Cloud] Remote stream unavailable (#{err.message}). Loading local fallback..."
-        load local_pilot_main
-        AluDoorPilot::ReportDialog.show_report
       else
-        UI.messagebox("❌ Network Error: Could not connect to #{endpoint}\n#{err.message}")
+        UI.messagebox("❌ Cloud Error: #{res_data['error'] || 'Unknown error'}")
+      end
+    else
+      begin
+        err_body = JSON.parse(response.body)
+        msg = err_body['error'] || "Server returned HTTP #{response.code}"
+      rescue
+        msg = "Server returned HTTP #{response.code}"
+      end
+
+      if response.code.to_i == 401
+        Sketchup.write_default('AluDoorCloud', 'user_pwd', '')
+        UI.messagebox("❌ Login Failed: #{msg}\n\nPlease check your email/password or create an account in the admin portal.")
+      else
+        UI.messagebox("❌ Cloud Stream Failed: #{msg}")
       end
     end
   end
