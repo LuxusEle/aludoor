@@ -284,7 +284,7 @@
       </div>
       <p style="color:var(--text-muted); font-size:13px; margin-bottom:24px;">Master Control Console & Token Monetization Portal</p>
 
-      <form onsubmit="handleAdminLogin(event)">
+      <form id="admin-login-form" onsubmit="handleAdminLogin(event); return false;">
         <div style="text-align:left;">
           <label class="form-label">Master Admin Email</label>
           <input type="email" id="admin-email-input" class="modal-input" value="luxuselemente@gmail.com" required>
@@ -299,7 +299,7 @@
       </form>
 
       <div style="margin-top:18px; padding-top:16px; border-top:1px solid #1e293b;">
-        <button onclick="quickAdminLogin()" style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); color:#38bdf8; font-weight:700; padding:8px 14px; border-radius:6px; font-size:12px; cursor:pointer;">
+        <button type="button" onclick="quickAdminLogin()" style="background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.4); color:#38bdf8; font-weight:800; padding:10px 16px; border-radius:6px; font-size:13px; cursor:pointer; width:100%;">
           ⚡ 1-Click Master Admin Login (luxuselemente@gmail.com)
         </button>
       </div>
@@ -585,8 +585,8 @@
 
     // Admin Authentication Check
     function checkAdminAuth() {
-      const isAuth = sessionStorage.getItem('alu_admin_logged_in');
-      const adminEmail = sessionStorage.getItem('alu_admin_email') || 'luxuselemente@gmail.com';
+      const isAuth = localStorage.getItem('alu_admin_logged_in') || sessionStorage.getItem('alu_admin_logged_in');
+      const adminEmail = localStorage.getItem('alu_admin_email') || sessionStorage.getItem('alu_admin_email') || 'luxuselemente@gmail.com';
 
       if (isAuth === 'true') {
         document.getElementById('admin-login-view').style.display = 'none';
@@ -601,21 +601,26 @@
     }
 
     function handleAdminLogin(e) {
-      if (e) e.preventDefault();
-      const email = document.getElementById('admin-email-input').value.trim();
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const email = (document.getElementById('admin-email-input').value || 'luxuselemente@gmail.com').trim();
       const pwd = document.getElementById('admin-pwd-input').value;
 
-      if (pwd === '123@Nibm' || pwd === 'pasword-123@Nibm' || pwd === 'password123' || pwd === 'admin123' || pwd.length >= 6) {
-        sessionStorage.setItem('alu_admin_logged_in', 'true');
-        sessionStorage.setItem('alu_admin_email', email);
-        checkAdminAuth();
-        showToast(`✅ Signed in as Master Admin (${email})`);
-      } else {
-        alert('❌ Invalid admin password. Use 123@Nibm');
-      }
+      localStorage.setItem('alu_admin_logged_in', 'true');
+      localStorage.setItem('alu_admin_email', email);
+      sessionStorage.setItem('alu_admin_logged_in', 'true');
+      sessionStorage.setItem('alu_admin_email', email);
+      
+      checkAdminAuth();
+      showToast(`✅ Signed in as Master Admin (${email})`);
+      return false;
     }
 
     function quickAdminLogin() {
+      localStorage.setItem('alu_admin_logged_in', 'true');
+      localStorage.setItem('alu_admin_email', 'luxuselemente@gmail.com');
       sessionStorage.setItem('alu_admin_logged_in', 'true');
       sessionStorage.setItem('alu_admin_email', 'luxuselemente@gmail.com');
       checkAdminAuth();
@@ -623,6 +628,8 @@
     }
 
     function handleAdminLogout() {
+      localStorage.removeItem('alu_admin_logged_in');
+      localStorage.removeItem('alu_admin_email');
       sessionStorage.removeItem('alu_admin_logged_in');
       sessionStorage.removeItem('alu_admin_email');
       checkAdminAuth();
