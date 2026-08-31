@@ -482,7 +482,7 @@
   <script>
     const SUPABASE_URL = 'https://iefeibuhjupnpmcomxbg.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_3NjI86Sk0ppx1s3f7Hr8ZQ_KiGjuWy9';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
     let authMode = 'signin';
 
@@ -524,7 +524,8 @@
 
       try {
         if (authMode === 'signup') {
-          const { data, error } = await supabase.auth.signUp({
+          if (!supabaseClient) throw new Error('Supabase client unavailable');
+          const { data, error } = await supabaseClient.auth.signUp({
             email,
             password,
             options: { data: { tokens: 100 } }
@@ -534,9 +535,10 @@
           closeAuthModal();
           window.location.href = '/download';
         } else {
-          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (!supabaseClient) throw new Error('Supabase client unavailable');
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
           if (error) throw error;
-          alert('✅ Welcome back! Authenticated with ' + (data.user.user_metadata?.tokens || 100) + ' Bar Tokens.');
+          alert('✅ Welcome back! Authenticated with ' + (data.user?.user_metadata?.tokens || 100) + ' Bar Tokens.');
           closeAuthModal();
           window.location.href = '/download';
         }
@@ -546,11 +548,13 @@
     }
 
     // Check logged in state on load
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        document.getElementById('btn-nav-auth').innerText = `${session.user.email.split('@')[0]} (${session.user.user_metadata?.tokens || 100} Tokens)`;
-      }
-    });
+    if (supabaseClient) {
+      supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          document.getElementById('btn-nav-auth').innerText = `${session.user.email.split('@')[0]} (${session.user.user_metadata?.tokens || 100} Tokens)`;
+        }
+      });
+    }
   </script>
 </body>
 </html>

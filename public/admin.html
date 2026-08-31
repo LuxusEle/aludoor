@@ -565,7 +565,7 @@
   <script>
     const SUPABASE_URL = 'https://iefeibuhjupnpmcomxbg.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_3NjI86Sk0ppx1s3f7Hr8ZQ_KiGjuWy9';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
     let fabricators = [
       { id: '0', email: 'luxuselemente@gmail.com', name: 'Luxus Elemente Admin', tier: 'Super Admin', tokens: 99999, password: '123@Nibm' },
@@ -705,11 +705,13 @@
       const tier = document.getElementById('new-user-tier').value;
 
       try {
-        await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { name, tokens, tier } }
-        });
+        if (supabaseClient) {
+          await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: { data: { name, tokens, tier } }
+          });
+        }
 
         const existing = fabricators.find(f => f.email === email);
         if (existing) {
@@ -820,7 +822,8 @@
 
     async function loadCloudQuotes() {
       try {
-        const { data, error } = await supabase
+        if (!supabaseClient) return;
+        const { data, error } = await supabaseClient
           .from('alu_doors')
           .select('*')
           .order('created_at', { ascending: false })
