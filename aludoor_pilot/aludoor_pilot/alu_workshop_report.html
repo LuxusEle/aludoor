@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ALU DOOR 70S — Multi-Opening Project Manager, 2D CAD & Vendor POs</title>
+  <title>ALU DOOR 70S Pro — Multi-Opening Project Manager, 2D CAD & Vendor POs</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
   <!-- html2pdf for Direct 1-Click Multi-Page PDF Download -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --primary: #0f172a;
@@ -33,7 +35,7 @@
       font-size: 13px;
     }
 
-    /* Top Action Bar */
+    /* Top Action Bar with Auth */
     .control-panel {
       position: sticky;
       top: 0;
@@ -98,6 +100,38 @@
       font-size: 11px;
       cursor: pointer;
     }
+
+    /* User Auth Pill in Header */
+    .user-auth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(56,189,248,0.3);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      color: #f8fafc;
+    }
+    .token-pill {
+      background: rgba(16,185,129,0.2);
+      color: #34d399;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono';
+    }
+    .btn-auth-switch {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #94a3b8;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-auth-switch:hover { color: #fff; background: rgba(255,255,255,0.25); }
 
     /* Main Container */
     .container {
@@ -509,15 +543,51 @@
       box-shadow: 0 4px 16px rgba(0,0,0,0.3);
       z-index: 2000;
     }
+
+    /* In-Dialog Auth Modal */
+    .dialog-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+    }
+    .dialog-modal-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px;
+      width: 90%;
+      max-width: 380px;
+      color: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .dialog-modal-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: white;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Top Control & Navigation Bar -->
+  <!-- Top Control & Navigation Bar with Auth Status -->
   <div class="control-panel">
     <div class="panel-left">
-      <div class="brand-logo"><span>📐</span> ALU DOOR 70S</div>
-      <div style="font-size:11px; color:#94a3b8;">Sri Lanka System (Alumex / Amex)</div>
+      <div class="brand-logo"><span>📐</span> ALU DOOR 70S Pro</div>
+      <div class="user-auth-badge" id="auth-status-container">
+        <span>👤</span> <span id="auth-user-email">asankasampath@gmail.com</span>
+        <span class="token-pill" id="auth-token-pill">🪙 100 Bar Tokens</span>
+        <button class="btn-auth-switch" onclick="openAuthModal()">Switch</button>
+      </div>
     </div>
 
     <div class="panel-right">
@@ -804,6 +874,21 @@
 
   </div>
 
+  <!-- AUTH MODAL IN DIALOG -->
+  <div class="dialog-modal-overlay" id="dialog-auth-modal">
+    <div class="dialog-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="font-size:16px; font-weight:800;">🔑 Fabricator Account Login</h3>
+        <button onclick="closeAuthModal()" style="background:none; border:none; color:#94a3b8; font-size:18px; cursor:pointer;">✕</button>
+      </div>
+      <p style="font-size:12px; color:#94a3b8; margin-bottom:16px;">Sign in with your Supabase account to sync quotes and access Bar Tokens</p>
+      
+      <input type="email" id="dialog-login-email" class="dialog-modal-input" placeholder="Fabricator Email">
+      <input type="password" id="dialog-login-pwd" class="dialog-modal-input" placeholder="Password">
+      <button onclick="submitDialogLogin()" style="width:100%; padding:10px; background:#2563eb; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer;">Sign In & Sync Tokens</button>
+    </div>
+  </div>
+
   <!-- HIDDEN FULL-PAGES CONTAINER FOR DIRECT PDF GENERATION -->
   <div id="pdf-export-container" style="display:none; max-width:1100px; padding:20px; background:white; color:#0f172a;"></div>
 
@@ -821,6 +906,10 @@
       '70S-1701':   `<svg viewBox="0 0 32.9 29.0" class="profile-thumb-svg"><path d="M 2.52,25.41 L 2.52,19.6 L 5.02,19.47 L 5.49,19.6 L 5.49,20.79 L 3.79,20.79 L 4.17,25.95 L 11.42,26.17 L 12.09,25.54 L 12.19,3.79 L 11.42,2.81 L 4.34,2.9 L 3.79,3.79 L 3.79,8.2 L 5.49,8.2 L 5.49,9.39 L 2.73,9.47 L 2.52,2.48 L 1.5,2.48 L 1.5,1.5 L 31.39,1.5 L 31.39,27.48 L 1.5,27.48 L 1.5,26.46 L 2.52,26.46 L 2.52,25.62 Z M 13.5,26.18 L 30.1,26.18 L 30.1,2.78 L 13.5,2.78 Z" fill="#0284c7" fill-rule="evenodd" stroke="#0f172a" stroke-width="0.8"/></svg>`,
       '70S-1601':   `<svg viewBox="0 0 32.9 35.0" class="profile-thumb-svg"><path d="M 2.52,31.42 L 2.52,25.62 L 5.02,25.49 L 5.49,25.62 L 5.49,26.8 L 3.79,26.8 L 4.17,31.97 L 11.42,32.19 L 12.09,31.56 L 12.19,9.81 L 11.42,8.83 L 4.34,8.92 L 3.79,9.81 L 3.79,14.21 L 5.49,14.21 L 5.49,15.4 L 2.73,15.49 L 2.52,8.49 L 1.5,8.49 L 1.5,7.52 L 13.5,7.52 L 13.5,1.5 L 21.5,1.5 L 21.5,2.8 L 14.8,2.8 L 14.8,7.52 L 31.39,7.52 L 31.39,33.5 L 1.5,33.5 L 1.5,32.48 L 2.52,32.48 L 2.52,31.64 Z M 13.5,32.2 L 30.1,32.2 L 30.1,8.8 L 13.5,8.8 Z" fill="#0284c7" fill-rule="evenodd" stroke="#0f172a" stroke-width="0.8"/></svg>`
     };
+
+    // User Session & Token State
+    let currentUserEmail = 'asankasampath@gmail.com';
+    let currentUserTokens = 100;
 
     // Master Vendor Price Catalogs Database (Aluminium, Hardware, Glass)
     let vendorPriceCatalog = {
@@ -890,6 +979,44 @@
 
     let isXRayMode = true;
     let lastCalculatedData = null;
+
+    function setInitialAuthState(email, tokens) {
+      currentUserEmail = email || 'fabricator@aludoor.com';
+      currentUserTokens = tokens || 100;
+      document.getElementById('auth-user-email').innerText = currentUserEmail;
+      document.getElementById('auth-token-pill').innerText = `🪙 ${currentUserTokens} Bar Tokens`;
+    }
+
+    function openAuthModal() {
+      document.getElementById('dialog-auth-modal').style.display = 'flex';
+    }
+
+    function closeAuthModal() {
+      document.getElementById('dialog-auth-modal').style.display = 'none';
+    }
+
+    function submitDialogLogin() {
+      const email = document.getElementById('dialog-login-email').value.trim();
+      const pwd = document.getElementById('dialog-login-pwd').value;
+      if (!email || !pwd) {
+        alert("Please enter email and password.");
+        return;
+      }
+      if (window.sketchup && window.sketchup.authLogin) {
+        window.sketchup.authLogin(JSON.stringify({ email, password: pwd }));
+      } else {
+        onAuthSuccess(email, 100);
+      }
+      closeAuthModal();
+    }
+
+    function onAuthSuccess(email, tokens) {
+      currentUserEmail = email;
+      currentUserTokens = tokens;
+      document.getElementById('auth-user-email').innerText = email;
+      document.getElementById('auth-token-pill').innerText = `🪙 ${tokens} Bar Tokens`;
+      showToast(`✅ Signed in as ${email} (${tokens} Tokens)`);
+    }
 
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
@@ -978,7 +1105,13 @@
     }
 
     function recalculateBatchProject() {
-      showToast("🚀 Generating 3D in SketchUp & recalculating project...");
+      const barsNeeded = lastCalculatedData ? lastCalculatedData.totalStockBars : 7;
+      showToast(`🚀 Generating 3D in SketchUp (Deducting ${barsNeeded} Bar Tokens)...`);
+
+      if (currentUserTokens >= barsNeeded) {
+        currentUserTokens -= barsNeeded;
+        document.getElementById('auth-token-pill').innerText = `🪙 ${currentUserTokens} Bar Tokens`;
+      }
 
       if (window.sketchup && window.sketchup.generateBatchSchedule) {
         window.sketchup.generateBatchSchedule(JSON.stringify(projectSchedule));
@@ -1781,6 +1914,7 @@
     function onSaveToSupabase() {
       const payload = {
         name: `ALU DOOR Project (${projectSchedule.length} Openings)`,
+        fabricator_email: currentUserEmail,
         schedule: projectSchedule,
         vendor_price_catalog: vendorPriceCatalog,
         selected_alu_vendors: selectedProfileVendors,
